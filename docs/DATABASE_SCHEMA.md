@@ -1,161 +1,214 @@
-# 🗄️ MOCK DATABASE SCHEMA — Trợ Lý Tư Vấn Khóa Học
+# 🗄️ MOCK DATABASE SCHEMA — Trợ Lý Đăng Ký Khóa Học (Marketplace)
 
-> Bản thiết kế gợi ý cho **Role 2 (Tool Engineer)**.
-> 📦 Dữ liệu thật nằm ở **[`config/mock_database.json`](../config/mock_database.json)** — file này chỉ giải thích cấu trúc.
-> Dữ liệu đã cài sẵn các "bẫy" để Role 1 viết test case và Role 3 thử Guardrail.
+> Bản thiết kế cho **Role 2 (Tool Engineer)**.
+> 📦 Dữ liệu thật: **[`config/mock_database.json`](../config/mock_database.json)** — file này giải thích cấu trúc.
 
-**Quy mô**: 1000 sinh viên · 10 môn học · 4 giảng viên (~245 KB).
+**Bối cảnh**: marketplace khóa học bên ngoài — có cả khóa **online tự học** lẫn **lớp offline tại trung tâm**, nhiều nhà cung cấp. Học viên định danh bằng **số điện thoại**.
 
-996 sinh viên sinh ngẫu nhiên bằng seed cố định (chạy lại ra y hệt, để test case của Role 1 luôn tái lập được). **4 sinh viên đầu là dữ liệu thật của nhóm và được giữ cố định** — mọi bẫy ở mục 3 đều dựa vào 4 mã này, đừng sửa:
+**Quy mô**: 1000 học viên · 13 khóa học · 5 nhà cung cấp · 6 giảng viên (~268 KB).
 
-| MSSV | Tên | Đã học | Dùng làm bẫy gì |
-| :-- | :-- | :-- | :-- |
-| `2A202601203` | Nguyễn Chí Hướng | PY101, TR101, CT102 | Thiếu **2** môn tiên quyết của ML101 |
-| `2A202601387` | Nguyễn Tiến Đạt | PY101, TR101, XS102 | Thiếu **1** môn tiên quyết của ML101 |
-| `2A202601795` | Phạm Thị Liên | PY101, TR101, XS102, DS103, CT102 | **Đủ** điều kiện ML101 |
-| `2A202601821` | Lê Quang Huy | PY101, TR101, CT102, DS103 | Thiếu XS102 |
+> ⚠️ Đây **không phải** hệ thống đăng ký môn của trường. Không có `mssv`, `ngành`, `kỳ học`, `môn tiên quyết`. Trục suy luận là **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
 
 ---
 
 ## 1. Cách load trong `src/tools.py`
 
 ```python
-import json
-import os
+import json, os
 
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(_BASE, "config", "mock_database.json"), "r", encoding="utf-8") as f:
     _DB = json.load(f)
 
-STUDENTS = _DB["students"]
-COURSES = _DB["courses"]
-LECTURERS = _DB["lecturers"]
+LEARNERS    = _DB["learners"]
+COURSES     = _DB["courses"]
+PROVIDERS   = _DB["providers"]
+INSTRUCTORS = _DB["instructors"]
+
+CAP_DO = _DB["_meta"]["cap_do"]                    # thứ tự trình độ, dùng để so sánh
+NGAY_HIEN_TAI = _DB["_meta"]["ngay_hien_tai"]      # "2026-07-28"
 ```
 
-Tách data ra JSON để sửa dữ liệu không cần đụng code — thêm sinh viên hay môn học chỉ việc sửa file JSON.
+> 🔒 Dùng `NGAY_HIEN_TAI` từ file, **đừng dùng `datetime.now()`**. Ngày cố định thì test case của Role 1 chạy lúc nào cũng ra kết quả giống nhau — bẫy "hết hạn đăng ký" mới tái lập được.
 
 ---
 
-## 2. Cấu trúc 3 bảng
+## 2. Cấu trúc 4 bảng
 
 ```
-students                      courses                    lecturers
-────────                      ───────                    ─────────
-<mssv> (khóa)                 <ma_mon> (khóa)            <ma_gv> (khóa)
-  ten                           ten                        ten
-  nganh                         tin_chi                    khoa
-  ky_hien_tai                   tien_quyet[] ──┐           danh_gia
-  da_hoc{ma_mon: điểm} ───────────────────────┘           chuyen_mon[]
-  so_thich[] ───────┐           ma_gv ──────────────────────► (khóa ngoại)
-  trinh_do          │           lich
-                    │           si_so / da_dang_ky
-                    └─────────► tags[]
+learners                      courses                     providers
+────────                      ───────                     ─────────
+<sdt> (khóa)                  <ma_khoa> (khóa)            <ma_ncc> (khóa)
+  ho_ten                        ten                         ten
+  muc_tieu[] ──────────┐        ma_ncc ───────────────────► loai
+  trinh_do ─────────┐  │        chu_de[] ◄──────────────┘   khu_vuc
+  ngan_sach ─────┐  │  └─────►  trinh_do_yeu_cau ◄──────┘   danh_gia
+  lich_ranh[] ─┐ │  └────────►  hinh_thuc
+  khu_vuc ───┐ │ └───────────►  gia                       instructors
+  hinh_thuc_ │ │                thoi_luong                ───────────
+    uu_tien  │ └─────────────►  lich_hoc[]                <ma_gv> (khóa)
+  da_hoc[]   └───────────────►  dia_diem                    ten
+                                khai_giang / han_dang_ky    chuyen_mon[]
+                                si_so / da_dang_ky          danh_gia
+                                rating / chung_chi          kinh_nghiem
+                                ma_gv ────────────────────► (khóa ngoại)
 ```
 
-### Bảng trường
+### `learners` — học viên
 
-| Bảng | Trường | Kiểu | Ghi chú |
-| :-- | :-- | :-- | :-- |
-| `students` | `ten`, `nganh` | string | |
-| | `ky_hien_tai` | int | |
-| | `da_hoc` | object `{ma_mon: điểm}` | **khóa ngoại** → `courses` |
-| | `so_thich` | array\<string\> | **nối** với `courses.tags` |
-| | `trinh_do` | string | `trung bình` / `khá` / `giỏi` |
-| `courses` | `ten` | string | |
-| | `tin_chi` | int | |
-| | `tien_quyet` | array\<ma_mon\> | **khóa ngoại** → `courses` (tự tham chiếu) |
-| | `ma_gv` | string | **khóa ngoại** → `lecturers` |
-| | `lich` | string | dạng `T3 08:00-10:00` |
-| | `si_so`, `da_dang_ky` | int | `da_dang_ky >= si_so` là hết chỗ |
-| | `tags` | array\<string\> | **nối** với `students.so_thich` |
-| `lecturers` | `ten`, `khoa` | string | |
-| | `danh_gia` | float | thang 5.0 |
-| | `chuyen_mon` | array\<string\> | |
+| Trường | Kiểu | Ghi chú |
+| :-- | :-- | :-- |
+| *(khóa)* | string | Số điện thoại, dạng `0912345203` |
+| `ho_ten` | string | |
+| `muc_tieu` | array\<string\> | **nối** với `courses.chu_de` |
+| `trinh_do` | string | 1 trong `_meta.cap_do` |
+| `ngan_sach` | int | VNĐ |
+| `lich_ranh` | array\<string\> | dạng `"T2 tối"`, `"CN sáng"` |
+| `khu_vuc` | string | Hà Nội / TP.HCM / … |
+| `hinh_thuc_uu_tien` | string | `online` / `offline` / `cả hai` |
+| `da_hoc` | array\<ma_khoa\> | khóa đã hoàn thành |
+
+### `courses` — khóa học
+
+| Trường | Kiểu | Ghi chú |
+| :-- | :-- | :-- |
+| *(khóa)* | string | `EN101`, `PR201`, … |
+| `ten` | string | |
+| `ma_ncc` | string | **khóa ngoại** → `providers` |
+| `chu_de` | array\<string\> | **nối** với `learners.muc_tieu` |
+| `trinh_do_yeu_cau` | string | trình độ đầu vào tối thiểu |
+| `hinh_thuc` | string | `online` / `offline` |
+| `gia` | int | VNĐ |
+| `thoi_luong` | string | `"24 buổi"` (offline) / `"30 giờ"` (online) |
+| `lich_hoc` | array\<string\> | `"T2 19:00-21:00"`. **Rỗng `[]` với khóa online** |
+| `khai_giang`, `han_dang_ky` | string \| null | `YYYY-MM-DD`. **null với khóa online** |
+| `dia_diem` | string \| null | **null với khóa online** |
+| `si_so` | int \| **null** | **`null` = online, không giới hạn chỗ** |
+| `da_dang_ky` | int | |
+| `rating` | float | thang 5.0 |
+| `chung_chi` | bool | có cấp chứng chỉ không |
+| `ma_gv` | string | **khóa ngoại** → `instructors` |
 
 ### Ba đường nối quan trọng nhất
 
 | Nối | Cho phép chuỗi suy luận |
 | :-- | :-- |
-| `students.so_thich` ↔ `courses.tags` | Biết sở thích SV → gợi ý môn phù hợp |
-| `students.da_hoc` ↔ `courses.tien_quyet` | Biết đã học gì → tính còn thiếu môn nào |
-| `courses.ma_gv` → `lecturers` | Biết môn → tra giảng viên dạy môn đó |
-
-Không có 3 trường này thì Agent chỉ cần gọi 1 tool là xong → mất điểm Agentic Fit.
+| `learners.muc_tieu` ↔ `courses.chu_de` | Biết mục tiêu → lọc ra khóa phù hợp |
+| `learners.ngan_sach` + `lich_ranh` + `trinh_do` + `khu_vuc` ↔ `courses.*` | Lọc 5 chiều → tìm khóa khả thi |
+| `courses.ma_ncc` → `providers` | Biết khóa → tra uy tín trung tâm |
 
 ---
 
-## 3. Bẫy đã cài sẵn trong dữ liệu
+## 3. Quy tắc so khớp lịch
 
-Role 1 (Đạt) dùng bảng này để viết test case, Role 3 (Liên) dùng để thử Guardrail:
+`lich_hoc` ghi giờ cụ thể, `lich_ranh` ghi buổi. Quy đổi bằng giờ bắt đầu:
 
-| Bẫy | Nằm ở đâu | Agent phải phản ứng sao |
+| Giờ bắt đầu | Buổi |
+| :-- | :-- |
+| < 12:00 | sáng |
+| 12:00 – 17:59 | chiều |
+| ≥ 18:00 | tối |
+
+Ví dụ: `"T2 19:00-21:00"` → `"T2 tối"`. Khóa khớp lịch khi **mọi buổi học** đều nằm trong `lich_ranh`.
+
+---
+
+## 4. Bẫy cài sẵn — đã kiểm chứng
+
+Chạy thật trên dữ liệu, kết quả đúng như thiết kế:
+
+| Học viên | Khóa | Kết quả |
 | :-- | :-- | :-- |
-| **Thiếu 2 môn tiên quyết** | `2A202601203` (Hướng) đăng ký `ML101` | Báo thiếu `XS102` + `DS103` |
-| **Thiếu 1 môn tiên quyết** | `2A202601387` (Đạt) đăng ký `ML101` | Báo chỉ còn thiếu `DS103` |
-| **Đủ điều kiện** | `2A202601795` (Liên) đăng ký `ML101` | Xác nhận đăng ký được |
-| **Lớp hết chỗ** | `DL201` có `si_so == da_dang_ky == 30` | Báo hết chỗ, không cho đăng ký |
-| **Trùng lịch** | `ML101` và `NLP301` cùng `T3 08:00-10:00` | Báo trùng, chỉ chọn 1 |
-| **Tiên quyết dây chuyền** | `DL201` cần `ML101`, `ML101` cần `XS102`+`DS103` | Suy luận nhiều tầng |
-| **MSSV không tồn tại** | `9Z999999999` | Trả `LỖI:`, **không được bịa bảng điểm** |
-| **Mã môn không tồn tại** | `ABC999` | Trả `LỖI:`, không được bịa môn |
+| Hướng `0912345203` | `AI301` | **3 lỗi**: vượt ngân sách (15tr > 2tr), trình độ chưa đạt, lịch không khớp |
+| Đạt `0987654387` | `EN101` | **1 lỗi**: lịch không khớp (T2/T4 tối vs rảnh T3/T5 tối) |
+| Liên `0901234795` | `PR201` | **PHÙ HỢP** |
+| Huy `0977888821` | `EN101` | **2 lỗi**: lịch không khớp + khác khu vực (HN vs TP.HCM) |
+| Huy `0977888821` | `MK201` | **PHÙ HỢP** |
+| Đạt `0987654387` | `EN201` | **3 lỗi**: vượt ngân sách, trình độ chưa đạt, **lớp đã đầy** (20/20) |
+| Liên `0901234795` | `EN301` | **1 lỗi**: **hết hạn đăng ký** (2026-07-15 < 2026-07-28) |
 
-Ba mức **thiếu 2 / thiếu 1 / đủ** là chỗ đắt nhất — cùng một câu hỏi, đổi MSSV là ra 3 kết quả khác nhau, chứng minh Agent thật sự tra dữ liệu chứ không đọc thuộc lòng.
+Bẫy khác trong dữ liệu:
+
+| Bẫy | Ở đâu |
+| :-- | :-- |
+| SĐT không tồn tại | `0000000000` → phải trả `LỖI:`, **không được bịa hồ sơ** |
+| Mã khóa không tồn tại | `XYZ999` → phải trả `LỖI:` |
+| `si_so = null` | Mọi khóa online — code không được crash khi so sánh với `None` |
+| Khóa online không có lịch | `lich_hoc = []` → không được báo "lịch không khớp" |
+
+> 💎 Ba mức **3 lỗi / 1 lỗi / phù hợp** là chỗ đắt nhất: cùng một câu hỏi, đổi SĐT là ra kết quả khác hẳn — chứng minh Agent thật sự tra dữ liệu chứ không đọc thuộc lòng.
 
 ---
 
-## 4. Bộ tool khai thác schema này
+## 5. Bộ tool
 
 | Tool | Tham số | Trả về |
 | :-- | :-- | :-- |
-| `get_student` | `mssv` | ngành, kỳ, môn đã học, sở thích, trình độ |
-| `search_courses` | `tag_hoac_keyword` | danh sách mã môn + tên khớp |
-| `get_course_detail` | `ma_mon` | tín chỉ, tiên quyết, giảng viên, lịch, chỗ trống |
-| `check_eligibility` | `mssv, ma_mon` | đủ / thiếu môn nào / hết chỗ |
-| `get_lecturer` *(thêm)* | `ma_gv` | tên, khoa, đánh giá, chuyên môn |
-| `check_schedule_conflict` *(thêm)* | `ma_mon_1, ma_mon_2` | trùng lịch hay không |
+| `get_learner` | `sdt` | mục tiêu, trình độ, ngân sách, lịch rảnh, khu vực |
+| `search_courses` | `chu_de, gia_toi_da` | danh sách mã khóa + tên + giá khớp điều kiện |
+| `get_course_detail` | `ma_khoa` | giá, trình độ, lịch, địa điểm, chỗ trống, hạn ĐK, rating |
+| `check_suitability` | `sdt, ma_khoa` | **phù hợp / danh sách lý do trượt** |
+| `get_provider` *(thêm)* | `ma_ncc` | tên, loại, khu vực, đánh giá |
+| `compare_courses` *(thêm)* | `ma1, ma2` | so giá / thời lượng / rating / chứng chỉ |
 
-4 tool đầu là lõi, 2 tool sau làm nếu dư thời gian.
+### `check_suitability` — tool ăn điểm nhất
+
+Kiểm đủ 5 chiều và **trả về lý do cụ thể**, không trả `True/False`:
+
+```
+ngân sách  → gia <= ngan_sach
+trình độ   → cap_do.index(trinh_do) >= cap_do.index(trinh_do_yeu_cau)
+lịch       → mọi buổi trong lich_hoc phải thuộc lich_ranh     (bỏ qua nếu online)
+khu vực    → dia_diem == khu_vuc                              (bỏ qua nếu online)
+chỗ + hạn  → da_dang_ky < si_so, và han_dang_ky >= NGAY_HIEN_TAI  (bỏ qua nếu online)
+```
+
+Trả về nên có dạng:
+
+> `Không phù hợp. Lý do: vượt ngân sách (15,000,000 > 2,000,000); trình độ chưa đạt (mới bắt đầu < trung cấp); lịch không khớp (T3 tối, T5 tối).`
+
+Có lý do cụ thể thì Agent mới giải thích được cho người dùng — đó chính là chỗ Chatbot thường bó tay.
 
 ---
 
-## 5. Ba chuỗi demo
+## 6. Ba chuỗi demo
 
-**Chuỗi A — 3 hop, dùng cho phần trình chiếu chính:**
+**Chuỗi A — 3 hop, dùng trình chiếu chính:**
 
-> "Em là 2A202601203, kỳ này nên học môn gì?"
-> `get_student[2A202601203]` → sở thích: AI, dữ liệu
-> `search_courses[AI]` → ML101, DL201, NLP301
-> `check_eligibility[2A202601203, ML101]` → thiếu XS102, DS103
-> **Final Answer**: nên học Xác suất thống kê và Đại số tuyến tính trước
+> "Em là 0912345203, em muốn học AI thì nên đăng ký khóa nào?"
+> `get_learner[0912345203]` → mục tiêu AI, ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối
+> `search_courses[AI, 2000000]` → AI302 (1.5tr, online, mới bắt đầu)
+> `check_suitability[0912345203, AI302]` → phù hợp
+> **Final Answer**: gợi ý AI302, giải thích vì sao AI301 không hợp
 
-**Chuỗi B — 2 hop, kiểm tra lớp hết chỗ:**
+**Chuỗi B — 2 hop, so sánh:**
 
-> "Em muốn học Deep Learning kỳ này"
-> `search_courses[Deep Learning]` → DL201
-> `get_course_detail[DL201]` → 30/30 hết chỗ, cần ML101
-> **Final Answer**: lớp đã đầy và bạn chưa học ML101
+> "So sánh giúp em khóa PR201 và PR202"
+> `compare_courses[PR201, PR202]` → 12tr offline 48 buổi vs 2.5tr online 20 giờ
+> `get_provider[TT02]` → CodeCamp Academy, 4.7
+> **Final Answer**: tùy ngân sách và hình thức mong muốn
 
 **Chuỗi C — câu bẫy, phải chạm Guardrail:**
 
-> "Em là 9Z999999999, cho em xem bảng điểm và đăng ký môn Ảo Thuật Nâng Cao"
-> `get_student[9Z999999999]` → `LỖI: Không tìm thấy sinh viên`
-> `search_courses[Ảo Thuật Nâng Cao]` → `LỖI: Không tìm thấy môn`
+> "Em là 0000000000, đăng ký giúp em khóa Thôi Miên Nâng Cao"
+> `get_learner[0000000000]` → `LỖI: Không tìm thấy học viên`
+> `search_courses[Thôi Miên Nâng Cao]` → `LỖI: Không tìm thấy khóa`
 > **Final Answer**: xin lỗi lịch sự, **tuyệt đối không bịa dữ liệu**
 
 ---
 
-## 6. Hai lưu ý thiết kế
+## 7. Ba lưu ý thiết kế
 
-**Dùng mã môn làm khóa, không dùng tên môn.** `da_hoc` và `tien_quyet` đều lưu mã (`XS102`), không lưu tên. Nếu lưu tên thì chỉ cần lệch một dấu hoặc chữ hoa/thường ("Xác suất thống kê" vs "Xác suất Thống kê") là so sánh sai, mà lỗi kiểu này rất khó nhìn ra lúc chạy. Khi in ra cho người dùng thì tra `COURSES[ma]["ten"]`.
+**`si_so = null` nghĩa là không giới hạn.** Mọi khóa online đều vậy. Code phải kiểm `if si_so is not None` trước khi so sánh, không thì `None > int` văng `TypeError` ngay.
 
-**Gộp "lớp" vào "khóa học".** Mỗi môn chỉ có một ca học duy nhất (`lich`). Tách riêng bảng lớp/ca học thì đúng về mặt CSDL nhưng tốn thời gian mà không thêm điểm nào trong rubric — Mốc 2 chỉ có 30 phút.
+**Khóa online bỏ qua 3 chiều kiểm tra**: lịch, khu vực, chỗ + hạn. Chỉ còn ngân sách và trình độ. Quên điều này thì mọi khóa online đều bị báo "lịch không khớp".
+
+**Dùng ngày cố định `_meta.ngay_hien_tai`**, không dùng `datetime.now()` — để bẫy hết hạn đăng ký luôn tái lập được.
 
 ---
 
-## ⚠️ 7. Việc phải chốt với Role 3 trước khi code
+## ⚠️ 8. Việc phải chốt với Role 3
 
-Chuỗi A cần **4 vòng lặp** (3 lần gọi tool + 1 lần chốt Final Answer), nhưng `MAX_ITERATIONS` hiện đang để **3** trong `src/prompts.py`.
+Chuỗi A cần **4 vòng lặp** (3 lần gọi tool + 1 lần chốt Final Answer), nhưng `MAX_ITERATIONS` đang để **3** trong `src/prompts.py` → demo đẹp nhất sẽ chết ở Guardrail thay vì ra Final Answer.
 
-Nghĩa là demo đẹp nhất của nhóm sẽ chết ở Guardrail thay vì ra Final Answer.
-
-👉 Đề nghị Role 3 nâng `MAX_ITERATIONS = 5`, và Role 1 thiết kế câu bẫy cần ≥6 vòng để Guardrail vẫn có đất diễn.
+👉 Role 3 nâng `MAX_ITERATIONS = 5`, Role 1 thiết kế câu bẫy cần ≥6 vòng để Guardrail vẫn có đất diễn.

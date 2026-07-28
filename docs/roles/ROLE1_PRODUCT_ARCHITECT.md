@@ -7,105 +7,135 @@
 | **File giữ** | `config/test_cases.json` + `docs/trace_eval.md` |
 | **Trọng số điểm** | 20% (Agentic Fit & Test Design) + 10% (Hybrid Flowchart) |
 
-> ℹ️ Vai này gộp Role 1 + Role 5 (nhóm 4 người / 5 vai). Lý do gộp: người viết test case hiểu rõ nhất câu nào là bẫy, nên soi trace log và chấm Scoring Matrix sẽ chính xác nhất.
+> ℹ️ Vai này gộp Role 1 + Role 5 (nhóm 4 người / 5 vai). Người viết test case hiểu rõ nhất câu nào là bẫy nên soi trace log chính xác nhất.
 
 ---
 
-## 🎯 Việc của bạn
+## 🎯 Đề tài nhóm
 
-Bạn quyết định **bài toán nhóm làm** và **bộ câu hỏi để thử Agent**, sau đó **chấm xem Agent làm tốt hay dở**.
+**Trợ Lý Đăng Ký Khóa Học — marketplace khóa học bên ngoài.**
 
-Đề tài nhóm đã chọn: **#7 — Trợ Lý Tư Vấn Khóa Học Sinh Viên**, hướng *tư vấn đăng ký môn dựa trên dữ liệu sinh viên* (KHÔNG phải tư vấn hướng nghiệp chung chung — xem mục ⚠️ bên dưới).
+Có cả khóa **online tự học** lẫn **lớp offline tại trung tâm**, nhiều nhà cung cấp. Học viên định danh bằng **số điện thoại**.
+
+Không phải hệ thống đăng ký môn của trường — không có `mssv`, `ngành`, `môn tiên quyết`. Trục suy luận là **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
+
+📦 Dữ liệu: [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa. Chi tiết: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
 
 ---
 
 ## 📍 MỐC 1 (20 phút) — Scoring Matrix
 
-Mở `docs/trace_eval.md`, điền bảng chấm 1–5 điểm cho 4 tiêu chí Agentic Fit:
+Mở `docs/trace_eval.md`, chấm 1–5 điểm cho 4 tiêu chí Agentic Fit:
 
-| Tiêu chí | Câu hỏi tự vấn | Điểm (1–5) |
+| Tiêu chí | Câu hỏi tự vấn | Điểm |
 | :-- | :-- | :-: |
-| **Cần dữ liệu ngoài?** | Trả lời được không nếu không tra cứu gì? | |
-| **Nhiều bước?** | Có phải gọi tool này rồi mới biết gọi tool kia? | |
-| **Có thao tác thật?** | Agent có phải *làm* gì không, hay chỉ nói? | |
-| **Rủi ro nếu sai?** | Sai thì hậu quả thế nào, có cần Guardrail? | |
+| **Cần dữ liệu ngoài?** | Chatbot có biết ngân sách và lịch rảnh của học viên không? | |
+| **Nhiều bước?** | Có phải tra hồ sơ rồi mới biết lọc khóa thế nào? | |
+| **Có thao tác thật?** | Agent có phải *kiểm tra* điều kiện không, hay chỉ nói chung chung? | |
+| **Rủi ro nếu sai?** | Tư vấn sai khóa 15 triệu thì sao? Có cần Guardrail? | |
 
-Đề 7 nên được điểm cao ở tiêu chí 1 và 2.
+Đề này nên được điểm cao ở tiêu chí 1 và 2.
 
 ---
 
 ## 📍 MỐC 2 (30 phút) — Viết 5 Test Cases
 
-Mở `config/test_cases.json`. Cần đủ 3 nhóm để chứng minh Chatbot thua Agent:
+Mở `config/test_cases.json`. Cần đủ 3 nhóm:
 
 | Loại | Số câu | Mục đích |
 | :-- | :-: | :-- |
-| 🟢 Đơn giản | 2 | Chatbot trả lời được → chứng minh không phải lúc nào cũng cần Agent |
+| 🟢 Đơn giản | 2 | Chatbot trả lời được → không phải lúc nào cũng cần Agent |
 | 🟡 Multi-step | 2 | Bắt buộc gọi tool, tool sau phụ thuộc tool trước |
-| 🔴 Edge case (bẫy) | 1 | Dữ liệu không tồn tại → xem Agent có **bịa** không |
+| 🔴 Edge case | 1 | Dữ liệu không tồn tại → xem Agent có **bịa** không |
 
-### Mẫu cho đề 7
+### Mẫu
 
 ```json
 [
   {
     "id": 1,
     "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Môn Machine Learning thường dạy những nội dung gì?",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn, không cần tool."
+    "question": "Học IELTS thì nên bắt đầu từ đâu?",
+    "expected_behavior": "Chatbot trả lời từ kiến thức có sẵn, không cần tool."
   },
   {
     "id": 3,
     "category": "🟡 Multi-step (Tool sau phụ thuộc tool trước)",
-    "question": "Em là sinh viên 2A202601203, em đủ điều kiện đăng ký môn Machine Learning chưa?",
-    "expected_behavior": "Agent gọi get_transcript('2A202601203') → check_prerequisites('ML') → so sánh → kết luận thiếu môn nào."
+    "question": "Em là 0912345203, em muốn học AI thì nên đăng ký khóa nào?",
+    "expected_behavior": "get_learner(0912345203) → biết ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối → search_courses(AI, 2000000) → check_suitability → gợi ý AI302."
+  },
+  {
+    "id": 4,
+    "category": "🟡 Multi-step (Kiểm tra điều kiện)",
+    "question": "Em là 0987654387, em đăng ký khóa EN101 được không?",
+    "expected_behavior": "Agent phải chỉ ra ĐÚNG 1 lý do trượt: lịch T2/T4 tối không khớp khung rảnh T3/T5 tối."
   },
   {
     "id": 5,
     "category": "🔴 Edge Case (Bẫy Guardrail)",
-    "question": "Em là sinh viên 9Z999999999, cho em xem bảng điểm và đăng ký môn Ảo Thuật Nâng Cao.",
-    "expected_behavior": "Tool trả lỗi 'không tìm thấy MSSV' và 'không tìm thấy môn'. Agent KHÔNG được bịa bảng điểm, phải báo lỗi lịch sự. Guardrail ngắt sau MAX_ITERATIONS bước."
+    "question": "Em là 0000000000, đăng ký giúp em khóa Thôi Miên Nâng Cao ạ.",
+    "expected_behavior": "Cả 2 tool trả LỖI. Agent KHÔNG được bịa hồ sơ hay bịa khóa học. Guardrail ngắt sau MAX_ITERATIONS bước, trả lời lịch sự."
   }
 ]
 ```
 
-> 💡 Câu bẫy là chỗ ăn điểm cao nhất. Một câu bẫy tốt phải khiến Agent **muốn** bịa ra dữ liệu.
+---
+
+## 🎣 Bẫy có sẵn trong dữ liệu — đã kiểm chứng
+
+Dùng bảng này để viết test case, khỏi phải tự dò:
+
+| Học viên | Khóa | Kết quả đúng |
+| :-- | :-- | :-- |
+| `0912345203` Hướng | `AI301` | **3 lỗi**: vượt ngân sách, trình độ chưa đạt, lịch không khớp |
+| `0987654387` Đạt | `EN101` | **1 lỗi**: lịch không khớp |
+| `0901234795` Liên | `PR201` | **PHÙ HỢP** |
+| `0977888821` Huy | `EN101` | **2 lỗi**: lịch + khác khu vực |
+| `0977888821` Huy | `MK201` | **PHÙ HỢP** |
+| `0987654387` Đạt | `EN201` | **3 lỗi**: ngân sách, trình độ, **lớp đã đầy** 20/20 |
+| `0901234795` Liên | `EN301` | **1 lỗi**: **hết hạn đăng ký** 2026-07-15 |
+
+> 💎 Ba mức **3 lỗi / 1 lỗi / phù hợp** là chỗ đắt nhất — cùng câu hỏi, đổi số điện thoại là ra kết quả khác hẳn. Đây là bằng chứng mạnh nhất rằng Agent tra dữ liệu thật.
+
+Bẫy dành riêng cho câu edge case: SĐT `0000000000` và mã khóa `XYZ999` đều không tồn tại.
 
 ---
 
 ## 📍 MỐC 3 (60 phút) — Soi Trace Log
 
-Sau khi Role 4 chạy được Agent, bạn chạy đủ 5 test case và dán log vào `docs/trace_eval.md`:
+Sau khi Huy chạy được Agent, chạy đủ 5 test case rồi dán log vào `docs/trace_eval.md`:
 
 ```markdown
-### Test Case 3 — Multi-step
-**Câu hỏi**: Em là sinh viên 2A202601203, em đủ điều kiện đăng ký ML chưa?
+### Test Case 4 — Kiểm tra điều kiện
+**Câu hỏi**: Em là 0987654387, em đăng ký khóa EN101 được không?
 
-Thought: Cần xem bảng điểm của sinh viên này trước.
-Action: get_transcript[2A202601203]
-Observation: Đã học: Toán rời rạc (A), Lập trình Python (B+)...
-Thought: Giờ kiểm tra môn tiên quyết của ML.
-Action: check_prerequisites[ML]
-Observation: ML yêu cầu: Xác suất thống kê, Đại số tuyến tính.
-Thought: Sinh viên chưa học Xác suất thống kê → chưa đủ điều kiện.
-Final Answer: Bạn còn thiếu môn Xác suất thống kê...
+Thought: Cần xem hồ sơ học viên này trước.
+Action: get_learner[0987654387]
+Observation: Nguyễn Tiến Đạt — mục tiêu tiếng Anh, trình độ cơ bản,
+             ngân sách 6,000,000đ, rảnh T3 tối/T5 tối, khu vực Hà Nội.
+Thought: Giờ kiểm tra khóa EN101 có phù hợp không.
+Action: check_suitability[0987654387, EN101]
+Observation: Không phù hợp. Lý do: lịch không khớp (T2 tối, T4 tối).
+Thought: Đã rõ nguyên nhân, trả lời học viên.
+Final Answer: Khóa EN101 hợp túi tiền và trình độ của bạn, nhưng học T2/T4 tối
+              mà bạn chỉ rảnh T3/T5 tối...
 
-**Nhận xét**: ✅ Agent gọi đúng 2 tool theo thứ tự phụ thuộc, không bịa dữ liệu.
+**Nhận xét**: ✅ Gọi đúng 2 tool theo thứ tự, chỉ ra đúng 1 lý do trượt, không bịa.
 ```
 
 Cần **ít nhất 1 trace hoàn chỉnh** để lấy điểm tiêu chí 3.
 
-Đồng thời ghi lại **Chatbot baseline trả lời gì** cho cùng câu đó — đây là bằng chứng so sánh quan trọng nhất của cả bài.
+Đồng thời ghi lại **Chatbot baseline trả lời gì** cho cùng câu đó — bằng chứng so sánh quan trọng nhất của cả bài. Chatbot không biết số điện thoại đó là ai nên chắc chắn sẽ trả lời chung chung hoặc bịa.
 
 ---
 
 ## 📍 MỐC 4 (40 phút) — Hybrid Flowchart
 
-Tạo file `docs/hybrid_flowchart.mermaid`:
+Tạo `docs/hybrid_flowchart.mermaid`:
 
 ```mermaid
 flowchart TD
-    A[Câu hỏi của sinh viên] --> B{Có cần dữ liệu<br/>cá nhân / danh mục môn?}
+    A[Câu hỏi của học viên] --> B{Có cần hồ sơ cá nhân<br/>hay dữ liệu khóa học?}
     B -- Không --> C[Chatbot Path<br/>LLM trả lời trực tiếp]
     B -- Có --> D[ReAct Agent Path]
     D --> E[Thought → Action → Observation]
@@ -117,23 +147,12 @@ flowchart TD
 
 ---
 
-## ⚠️ Bẫy lớn nhất của đề 7
-
-| Cách hiểu | Hậu quả |
-| :-- | :-- |
-| ❌ "Em nên học ngành gì? Học AI có tương lai không?" | Chatbot trả lời tốt ngang Agent → **mất điểm Agentic Fit** |
-| ✅ "Em đủ điều kiện đăng ký môn X chưa? Có trùng lịch môn Y không?" | Bắt buộc tra dữ liệu → Chatbot bó tay |
-
-Mọi test case phải bám hướng ✅.
-
----
-
 ## ✅ Checklist
 
-- [ ] Mốc 1: Điền Scoring Matrix 4 tiêu chí vào `docs/trace_eval.md`
-- [ ] Mốc 2: Viết đủ 5 test case (2 dễ / 2 multi-step / 1 bẫy) vào `config/test_cases.json`
+- [ ] Mốc 1: Scoring Matrix 4 tiêu chí
+- [ ] Mốc 2: 5 test case (2 dễ / 2 multi-step / 1 bẫy)
 - [ ] Mốc 2: Ghi lại câu trả lời của Chatbot baseline
-- [ ] Mốc 3: Dán ít nhất 1 trace log hoàn chỉnh
+- [ ] Mốc 3: Ít nhất 1 trace log hoàn chỉnh
 - [ ] Mốc 3: Kiểm tra Agent có vượt được câu bẫy không
 - [ ] Mốc 4: Vẽ `docs/hybrid_flowchart.mermaid`
 
@@ -146,7 +165,7 @@ git checkout role1-product-architect
 git pull origin main
 ```
 
-Sau khi làm xong:
+Xong việc:
 
 ```bash
 git add config/test_cases.json docs/trace_eval.md docs/hybrid_flowchart.mermaid

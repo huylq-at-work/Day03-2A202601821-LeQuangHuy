@@ -9,84 +9,82 @@
 
 ---
 
-## 🎯 Việc của bạn
+## 🎯 Đề tài & việc của bạn
 
-Viết các **"đồ nghề"** mà Agent gọi được. Mỗi tool là 1 hàm Python bình thường, nhưng có 2 yêu cầu khắt khe:
+**Trợ Lý Đăng Ký Khóa Học — marketplace khóa học bên ngoài** (online tự học + lớp offline tại trung tâm). Học viên định danh bằng **số điện thoại**.
 
-1. **Docstring phải rõ ràng** — LLM đọc docstring để biết khi nào nên gọi tool nào. Docstring mơ hồ = Agent gọi sai tool.
-2. **Không bao giờ được crash** — gặp lỗi phải `return` chuỗi báo lỗi, để Agent đọc `Observation` và tự xử lý.
+Bạn viết các **"đồ nghề"** mà Agent gọi được. Hai yêu cầu khắt khe:
+
+1. **Docstring phải rõ** — LLM đọc docstring để biết khi nào gọi tool nào. Mơ hồ = Agent gọi sai tool.
+2. **Không bao giờ crash** — gặp lỗi phải `return` chuỗi báo lỗi, để Agent đọc `Observation` rồi tự xử lý.
+
+📦 Dữ liệu đã có sẵn: [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa, 5 nhà cung cấp, 6 giảng viên.
+📘 Chi tiết từng trường: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
 
 ---
 
-## 📍 MỐC 1 (20 phút) — Liệt kê tool
+## 📍 MỐC 1 (20 phút) — Load database & chốt danh sách tool
 
-Đề tài: **#7 — Trợ Lý Tư Vấn Khóa Học Sinh Viên**. Bộ 4 tool đề xuất:
+```python
+import json, os
 
-| Tool | Việc | Vì sao cần |
+_BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(_BASE, "config", "mock_database.json"), "r", encoding="utf-8") as f:
+    _DB = json.load(f)
+
+LEARNERS    = _DB["learners"]
+COURSES     = _DB["courses"]
+PROVIDERS   = _DB["providers"]
+INSTRUCTORS = _DB["instructors"]
+
+CAP_DO = _DB["_meta"]["cap_do"]                 # ["mới bắt đầu","cơ bản","trung cấp","nâng cao"]
+NGAY_HIEN_TAI = _DB["_meta"]["ngay_hien_tai"]   # "2026-07-28"
+```
+
+### Bộ tool
+
+| Tool | Tham số | Trả về |
 | :-- | :-- | :-- |
-| `get_transcript(mssv)` | Trả bảng điểm + môn đã học | Dữ liệu cá nhân, LLM không thể tự biết |
-| `search_courses(keyword)` | Tra môn trong danh mục | Danh mục môn thay đổi theo kỳ |
-| `check_prerequisites(course_id)` | Trả danh sách môn tiên quyết | Kết quả này phụ thuộc tool trên |
-| `check_schedule_conflict(course_ids)` | Kiểm tra trùng lịch | Thao tác tính toán trên dữ liệu thật |
+| `get_learner` | `sdt` | mục tiêu, trình độ, ngân sách, lịch rảnh, khu vực |
+| `search_courses` | `chu_de, gia_toi_da` | danh sách mã khóa + tên + giá khớp |
+| `get_course_detail` | `ma_khoa` | giá, trình độ, lịch, địa điểm, chỗ trống, hạn ĐK, rating |
+| `check_suitability` | `sdt, ma_khoa` | **phù hợp / danh sách lý do trượt** |
+| `get_provider` *(thêm)* | `ma_ncc` | tên, loại, khu vực, đánh giá |
+| `compare_courses` *(thêm)* | `ma1, ma2` | so giá / thời lượng / rating / chứng chỉ |
 
-> 💡 Cặp `get_transcript` → `check_prerequisites` chính là chỗ thể hiện **ReAct thật**: Agent phải xem bảng điểm rồi mới biết sinh viên thiếu môn gì.
+4 tool đầu là lõi. 2 tool sau làm nếu dư thời gian.
 
 ---
 
 ## 📍 MỐC 2 (30 phút) — Viết tool + Docstring chuẩn
 
-### Cấu trúc dữ liệu giả lập
-
-Không cần database thật, chỉ cần `dict` ở đầu file:
+### Mẫu một tool chuẩn
 
 ```python
-# Dữ liệu giả lập — đủ để demo, không cần DB thật
-STUDENTS = {
-    "2A202601203": {
-        "ten": "Nguyễn Chí Hướng",
-        "nganh": "Khoa học máy tính",
-        "da_hoc": {"Toán rời rạc": "A", "Lập trình Python": "B+", "Cấu trúc dữ liệu": "A-"},
-    },
-    # ... thêm vài sinh viên nữa
-}
-
-COURSES = {
-    "ML101": {
-        "ten": "Machine Learning",
-        "tin_chi": 3,
-        "tien_quyet": ["Xác suất thống kê", "Đại số tuyến tính"],
-        "lich": "Thứ 3, 08:00-10:00",
-    },
-    # ... thêm vài môn nữa
-}
-```
-
-### Mẫu 1 tool chuẩn
-
-```python
-def get_transcript(mssv: str) -> str:
+def get_learner(sdt: str) -> str:
     """
-    Tra cứu bảng điểm và danh sách môn đã học của một sinh viên.
+    Tra cứu hồ sơ học viên theo số điện thoại.
 
-    Dùng tool này khi cần biết sinh viên ĐÃ HỌC những môn gì,
-    ví dụ để kiểm tra điều kiện tiên quyết trước khi đăng ký môn mới.
+    Dùng tool này ĐẦU TIÊN khi câu hỏi có nhắc tới số điện thoại,
+    để biết mục tiêu học, trình độ, ngân sách, lịch rảnh và khu vực của học viên.
 
     Args:
-        mssv (str): Mã số sinh viên (Ví dụ: '2A202601203')
+        sdt (str): Số điện thoại học viên (Ví dụ: '0912345203')
 
     Returns:
-        str: Ngành học và danh sách môn đã học kèm điểm.
-             Nếu không tìm thấy MSSV, trả về chuỗi báo lỗi.
+        str: Thông tin hồ sơ học viên.
+             Nếu không tìm thấy số điện thoại, trả về chuỗi báo lỗi.
     """
-    sv = STUDENTS.get(mssv.strip().upper())
-    if not sv:
-        return f"LỖI: Không tìm thấy sinh viên có MSSV '{mssv}' trong hệ thống."
+    hv = LEARNERS.get(sdt.strip())
+    if not hv:
+        return f"LỖI: Không tìm thấy học viên có số điện thoại '{sdt}'."
 
-    mon_da_hoc = ", ".join(f"{ten} ({diem})" for ten, diem in sv["da_hoc"].items())
-    return f"Sinh viên {sv['ten']} — Ngành {sv['nganh']}. Đã học: {mon_da_hoc}."
+    return (f"{hv['ho_ten']} — mục tiêu: {', '.join(hv['muc_tieu'])}; "
+            f"trình độ: {hv['trinh_do']}; ngân sách: {hv['ngan_sach']:,}đ; "
+            f"rảnh: {', '.join(hv['lich_ranh'])}; khu vực: {hv['khu_vuc']}.")
 ```
 
-Ba điểm cần bắt chước ở mẫu trên:
+Ba điểm cần bắt chước:
 
 - Dòng **"Dùng tool này khi..."** — dạy LLM biết lúc nào nên gọi
 - `Args` / `Returns` đầy đủ
@@ -98,44 +96,101 @@ Cuối file phải có registry để Role 4 gọi được:
 
 ```python
 AVAILABLE_TOOLS = {
-    "get_transcript": get_transcript,
+    "get_learner": get_learner,
     "search_courses": search_courses,
-    "check_prerequisites": check_prerequisites,
-    "check_schedule_conflict": check_schedule_conflict,
+    "get_course_detail": get_course_detail,
+    "check_suitability": check_suitability,
 }
 ```
 
 ---
 
-## 📍 MỐC 3 (60 phút) — Chống crash
+## 📍 MỐC 3 (60 phút) — `check_suitability`, tool ăn điểm nhất
 
-Role 1 sẽ ném câu bẫy vào Agent. Tool của bạn phải sống sót qua các trường hợp:
+Kiểm **5 chiều**, và phải trả về **lý do cụ thể** chứ không phải `True/False`:
+
+```
+ngân sách  → gia <= ngan_sach
+trình độ   → CAP_DO.index(trinh_do) >= CAP_DO.index(trinh_do_yeu_cau)
+lịch       → mọi buổi trong lich_hoc phải thuộc lich_ranh        (bỏ qua nếu online)
+khu vực    → dia_diem == khu_vuc                                 (bỏ qua nếu online)
+chỗ + hạn  → da_dang_ky < si_so, và han_dang_ky >= NGAY_HIEN_TAI (bỏ qua nếu online)
+```
+
+Kết quả mong muốn:
+
+> `Không phù hợp. Lý do: vượt ngân sách (15,000,000 > 2,000,000); trình độ chưa đạt (mới bắt đầu < trung cấp); lịch không khớp (T3 tối, T5 tối).`
+
+Có lý do cụ thể thì Agent mới giải thích được cho học viên — đó chính là chỗ Chatbot bó tay.
+
+### Quy đổi lịch
+
+`lich_hoc` ghi giờ, `lich_ranh` ghi buổi. Quy đổi bằng giờ bắt đầu:
+
+```python
+def buoi_cua(lich: str) -> str:
+    """'T2 19:00-21:00' -> 'T2 tối'"""
+    thu, gio = lich.split(" ", 1)
+    h = int(gio[:2])
+    return f"{thu} {'sáng' if h < 12 else 'chiều' if h < 18 else 'tối'}"
+```
+
+---
+
+## ⚠️ Ba cái bẫy trong dữ liệu dễ làm code văng
+
+| Bẫy | Ở đâu | Xử lý |
+| :-- | :-- | :-- |
+| **`si_so = null`** | Mọi khóa online (không giới hạn chỗ) | Phải `if si_so is not None` trước khi so sánh, không thì `None > int` văng `TypeError` |
+| **`lich_hoc = []`** | Mọi khóa online (tự học) | Không được báo "lịch không khớp" cho khóa online |
+| **`han_dang_ky = null`** | Mọi khóa online | Không được so sánh `None < "2026-07-28"` |
+
+Cách gọn nhất: kiểm `if kh["hinh_thuc"] == "offline"` rồi mới chạy 3 chiều lịch / khu vực / chỗ + hạn.
+
+> 🔒 Dùng `NGAY_HIEN_TAI` từ file, **đừng dùng `datetime.now()`**. Ngày cố định thì test case của Role 1 chạy lúc nào cũng ra kết quả giống nhau.
+
+---
+
+## 🧪 Tự test chống crash
+
+Role 1 sẽ ném câu bẫy vào Agent. Tool phải sống sót:
 
 | Tình huống | Phải trả về |
 | :-- | :-- |
-| MSSV không tồn tại | `"LỖI: Không tìm thấy sinh viên..."` |
-| Tên môn không có trong danh mục | `"LỖI: Không tìm thấy môn học..."` |
+| SĐT không tồn tại (`0000000000`) | `"LỖI: Không tìm thấy học viên..."` |
+| Mã khóa không tồn tại (`XYZ999`) | `"LỖI: Không tìm thấy khóa học..."` |
 | Tham số rỗng / `None` | `"LỖI: Thiếu tham số..."` |
-| Tham số sai kiểu (số thay vì chuỗi) | Ép kiểu bằng `str()` rồi xử lý |
-
-Tự test nhanh:
+| Khóa online đem đi kiểm lịch | Bỏ qua, không báo lỗi lịch |
 
 ```bash
-.venv\Scripts\python.exe -c "from src.tools import get_transcript; print(get_transcript('9Z999'))"
+.venv\Scripts\python.exe -c "import sys; sys.path.insert(0,'src'); from tools import get_learner; print(get_learner('0000000000'))"
 ```
 
 Chạy không văng traceback là đạt.
+
+### Kết quả đúng để đối chiếu
+
+| Học viên | Khóa | Kết quả |
+| :-- | :-- | :-- |
+| `0912345203` | `AI301` | 3 lỗi: ngân sách, trình độ, lịch |
+| `0987654387` | `EN101` | 1 lỗi: lịch |
+| `0901234795` | `PR201` | PHÙ HỢP |
+| `0977888821` | `EN101` | 2 lỗi: lịch, khu vực |
+| `0987654387` | `EN201` | 3 lỗi: ngân sách, trình độ, lớp đầy |
+| `0901234795` | `EN301` | 1 lỗi: hết hạn đăng ký |
+
+Tool của bạn phải ra đúng 6 dòng này.
 
 ---
 
 ## ✅ Checklist
 
-- [ ] Mốc 1: Chốt danh sách 4 tool với cả nhóm
-- [ ] Mốc 2: Viết dữ liệu giả lập (`STUDENTS`, `COURSES`) — ít nhất 3 sinh viên, 5 môn
-- [ ] Mốc 2: Viết đủ 4 hàm tool, mỗi hàm có docstring "Dùng tool này khi..."
+- [ ] Mốc 1: Load được `mock_database.json`, chốt danh sách tool với nhóm
+- [ ] Mốc 2: Viết 4 tool lõi, mỗi tool có docstring "Dùng tool này khi..."
 - [ ] Mốc 2: Khai báo `AVAILABLE_TOOLS`
-- [ ] Mốc 3: Mọi tool trả `"LỖI: ..."` thay vì crash
-- [ ] Mốc 3: Test thử 4 tình huống lỗi ở bảng trên
+- [ ] Mốc 3: `check_suitability` kiểm đủ 5 chiều, trả **lý do cụ thể**
+- [ ] Mốc 3: Xử lý `si_so = null`, `lich_hoc = []`, `han_dang_ky = null`
+- [ ] Mốc 3: Đối chiếu đúng 6 dòng kết quả ở bảng trên
 
 ---
 
@@ -146,10 +201,10 @@ git checkout role2-tool-engineer
 git pull origin main
 ```
 
-Sau khi làm xong:
+Xong việc:
 
 ```bash
 git add src/tools.py
-git commit -m "Role 2: 4 tools tu van khoa hoc + error handling"
+git commit -m "Role 2: tools marketplace khoa hoc + error handling"
 git push origin role2-tool-engineer
 ```

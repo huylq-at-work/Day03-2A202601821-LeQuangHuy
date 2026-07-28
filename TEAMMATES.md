@@ -13,7 +13,9 @@
 
 ## 2. Phân công vai trò & Branch
 
-Đề tài nhóm: **#7 — Trợ Lý Tư Vấn Khóa Học Sinh Viên** (hướng tư vấn đăng ký môn dựa trên dữ liệu sinh viên).
+Đề tài nhóm: **Trợ Lý Đăng Ký Khóa Học** — marketplace khóa học bên ngoài (khóa online tự học + lớp offline tại trung tâm). Học viên định danh bằng số điện thoại. Trục suy luận: **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
+
+📦 Dữ liệu: [`config/mock_database.json`](config/mock_database.json) · 📘 Schema: [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)
 
 | Thành viên | Vai trò | Branch | File giữ | Hướng dẫn |
 | :-- | :-- | :-- | :-- | :-- |
