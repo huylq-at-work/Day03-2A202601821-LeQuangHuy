@@ -17,6 +17,8 @@ Bạn viết **lời chỉ dẫn cho LLM** và lắp **phanh an toàn**.
 
 Đây là vai then chốt: nếu prompt không ép được LLM sinh đúng định dạng `Thought / Action`, code của Role 4 **không đọc ra tên tool** → cả vòng lặp ReAct sập. Prompt của bạn là hợp đồng giữa LLM và code.
 
+> 📖 **Đọc trước khi viết prompt**: [SCHEMA_FOR_PROMPT.md](../SCHEMA_FOR_PROMPT.md) — bản rút gọn 7 KB gồm từ vựng dữ liệu hợp lệ, đủ 13 mã khóa học, và **hình dạng Observation thật** mà mỗi tool trả về. Ví dụ few-shot trong prompt phải khớp với những chuỗi đó, nếu không LLM sẽ học sai định dạng.
+
 ---
 
 ## 📍 MỐC 1 (20 phút) — Liệt kê Failure Modes
