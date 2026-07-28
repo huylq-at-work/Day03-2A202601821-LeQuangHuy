@@ -161,13 +161,9 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
             matches.append((course["gia"], code, course))
 
     if not matches:
-        # Gợi ý chủ đề đang có để Agent tư vấn tiếp thay vì trả lời cụt lủn
-        co_san = sorted({cd for c in COURSES.values() for cd in c["chu_de"]})
-        re_nhat = min(c["gia"] for c in COURSES.values())
         return (
-            f"Không tìm thấy khóa học nào về '{topic}' dưới {_money(max_price)}. "
-            f"Các chủ đề hiện có: {', '.join(co_san)}. "
-            f"Khóa rẻ nhất trên hệ thống là {_money(re_nhat)}."
+            f"Không tìm thấy khóa học nào về '{topic}' "
+            f"dưới {_money(max_price)}."
         )
 
     matches.sort(key=lambda item: (item[0], item[1]))

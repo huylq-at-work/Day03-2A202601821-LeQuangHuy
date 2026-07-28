@@ -39,9 +39,30 @@ def load_test_cases():
         return json.load(f)
 
 
+# Bật bằng LOG_PROMPT=1 trong .env để soi đúng thứ gửi lên LLM.
+# Cần cho tiêu chí Observability: chứng minh Agent chạy bằng prompt thật,
+# không phải kết quả hardcode.
+LOG_PROMPT = os.getenv("LOG_PROMPT", "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def log_prompt(system_prompt: str, user_prompt: str, nhan: str = ""):
+    """In nguyên văn prompt gửi lên LLM (chỉ khi LOG_PROMPT bật)."""
+    if not LOG_PROMPT:
+        return
+    print(f"\n{'~' * 62}")
+    print(f"PROMPT GỬI LÊN LLM {nhan}")
+    print(f"{'~' * 62}")
+    print("--- SYSTEM PROMPT ---")
+    print(system_prompt.strip() or "(rỗng)")
+    print("--- USER / HISTORY ---")
+    print(user_prompt.strip())
+    print("~" * 62)
+
+
 def run_baseline_chatbot(user_query: str, provider):
     """Chatbot gốc: hỏi thẳng LLM, không có tool nào."""
     print(f"\n[CHATBOT BASELINE] Câu hỏi: {user_query}")
+    log_prompt(CHATBOT_BASELINE_PROMPT, user_query, "(Chatbot baseline)")
     response = provider.generate(user_query, system_prompt=CHATBOT_BASELINE_PROMPT)
     print(f"Chatbot trả lời:\n{response}")
 
@@ -121,6 +142,7 @@ def react_steps(user_query: str, provider, lich_su=None):
 
     for vong in range(1, MAX_ITERATIONS + 1):
         # 1. Hỏi LLM xem bước tiếp theo làm gì
+        log_prompt(REACT_SYSTEM_PROMPT, history, f"(ReAct — vòng {vong}/{MAX_ITERATIONS})")
         reply = provider.generate(history, system_prompt=REACT_SYSTEM_PROMPT)
         reply = cut_hallucinated_observation(reply)
         thought = tach_thought(reply)

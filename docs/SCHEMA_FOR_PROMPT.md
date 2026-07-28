@@ -3,7 +3,7 @@
 > File này **sinh tự động** từ [`config/mock_database.json`](../config/mock_database.json) — không chỉnh tay, dữ liệu đổi thì chạy lại script.
 > Mục đích: để Role 3 viết ví dụ few-shot trong `REACT_SYSTEM_PROMPT` **dùng đúng dữ liệu có thật**.
 
-**Quy mô**: 1,000 học viên · 13 khóa học · 5 nhà cung cấp · 6 giảng viên.  
+**Quy mô**: 1,000 học viên · 28 khóa học · 8 nhà cung cấp · 12 giảng viên.  
 **Ngày hệ thống (cố định)**: `2026-07-28`
 
 ---
@@ -16,13 +16,13 @@ Viết ví dụ trong prompt thì phải dùng đúng các giá trị dưới đ
 | :-- | :-- |
 | **Trình độ** (có thứ tự) | `mới bắt đầu` < `cơ bản` < `trung cấp` < `nâng cao` |
 | Trình độ học viên thực tế | `mới bắt đầu`, `cơ bản`, `trung cấp` |
-| **Chủ đề khóa học** | `AI`, `IELTS`, `công việc`, `dữ liệu`, `giao tiếp`, `lập trình`, `marketing`, `python`, `thiết kế`, `tiếng Anh`, `web` |
+| **Chủ đề khóa học** | `AI`, `IELTS`, `công việc`, `dữ liệu`, `giao tiếp`, `khoa học`, `kế toán`, `kỹ năng mềm`, `lập trình`, `marketing`, `ngoại ngữ`, `nhiếp ảnh`, `python`, `quản trị`, `thiết kế`, `tiếng Anh`, `tiếng Hàn`, `tiếng Nhật`, `toán`, `tài chính`, `vật lý`, `web`, `âm nhạc`, `đầu tư` |
 | Mục tiêu học viên | `AI`, `IELTS`, `dữ liệu`, `lập trình`, `marketing`, `thiết kế`, `tiếng Anh`, `web` |
 | **Khu vực** | `Cần Thơ`, `Hà Nội`, `Hải Phòng`, `TP.HCM`, `Đà Nẵng` |
 | **Hình thức** | khóa học: `online` / `offline` · ưu tiên HV: `cả hai`, `offline`, `online` |
 | **Buổi rảnh** | `T2`–`T7`, `CN` × `sáng` / `chiều` / `tối` (vd `CN chiều`) |
 | **Ngân sách** | 500,000đ – 20,000,000đ |
-| **Giá khóa** | 890,000đ – 15,000,000đ |
+| **Giá khóa** | 690,000đ – 15,000,000đ |
 
 ---
 
@@ -45,6 +45,21 @@ Dùng bảng này để viết ví dụ — mọi mã khóa, giá, lịch đều
 | `DE101` | Thiết kế đồ họa Canva & Figma | thiết kế | mới bắt đầu | on | 1,100,000 | tự học | — | ∞ | — |
 | `MK101` | Content Marketing cơ bản | marketing | mới bắt đầu | on | 890,000 | tự học | — | ∞ | — |
 | `MK201` | Digital Marketing tổng quan | marketing | cơ bản | of | 6,000,000 | T7 09:00-11:30, CN 09:00-11:30 | TP.HCM | 31/35 | 2026-08-17 |
+| `PH101` | Vật lý đại cương | vật lý, khoa học | mới bắt đầu | on | 1,200,000 | tự học | — | ∞ | — |
+| `PH201` | Vật lý luyện thi THPT | vật lý, khoa học | cơ bản | of | 4,500,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 17/30 | 2026-08-30 |
+| `MA101` | Toán cao cấp cơ bản | toán, khoa học | mới bắt đầu | on | 950,000 | tự học | — | ∞ | — |
+| `MA201` | Toán tư duy cho lập trình | toán, lập trình | cơ bản | on | 1,700,000 | tự học | — | ∞ | — |
+| `JP101` | Tiếng Nhật N5 | tiếng Nhật, ngoại ngữ | mới bắt đầu | of | 4,200,000 | T2 18:30-20:30, T4 18:30-20:30 | TP.HCM | 12/25 | 2026-09-01 |
+| `JP102` | Tiếng Nhật giao tiếp online | tiếng Nhật, giao tiếp | mới bắt đầu | on | 1,350,000 | tự học | — | ∞ | — |
+| `KR101` | Tiếng Hàn sơ cấp | tiếng Hàn, ngoại ngữ | mới bắt đầu | of | 3,900,000 | T3 18:30-20:30, T5 18:30-20:30 | TP.HCM | 20/25 | 2026-09-01 |
+| `FI101` | Quản lý tài chính cá nhân | tài chính | mới bắt đầu | on | 790,000 | tự học | — | ∞ | — |
+| `FI201` | Đầu tư chứng khoán cơ bản | tài chính, đầu tư | cơ bản | on | 2,300,000 | tự học | — | ∞ | — |
+| `AC101` | Kế toán cho người mới | kế toán | mới bắt đầu | on | 1,600,000 | tự học | — | ∞ | — |
+| `PT101` | Nhiếp ảnh cơ bản với điện thoại | nhiếp ảnh | mới bắt đầu | on | 690,000 | tự học | — | ∞ | — |
+| `UX201` | Thiết kế UI/UX | thiết kế, web | cơ bản | on | 3,200,000 | tự học | — | ∞ | — |
+| `MU101` | Guitar đệm hát cho người mới | âm nhạc | mới bắt đầu | of | 2,800,000 | T7 09:00-11:00, CN 09:00-11:00 | Hà Nội | 11/20 | 2026-08-24 |
+| `SK101` | Kỹ năng thuyết trình | kỹ năng mềm | mới bắt đầu | on | 1,100,000 | tự học | — | ∞ | — |
+| `SK201` | Quản trị dự án cho người đi làm | kỹ năng mềm, quản trị | cơ bản | of | 7,500,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 19/28 | 2026-09-05 |
 
 ⛔ = lớp đã đầy · ⏰ = hết hạn đăng ký · ∞ = online không giới hạn chỗ
 

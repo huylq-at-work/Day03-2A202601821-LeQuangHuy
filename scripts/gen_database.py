@@ -1,5 +1,10 @@
 """Sinh mock database marketplace khoa hoc ben ngoai: 1000 hoc vien + kiem tra bay."""
-import json, random, io, os
+import json, random, io, os, sys
+
+try:  # console Windows mac dinh cp1252, khong in duoc tieng Viet
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 random.seed(2026)  # seed co dinh -> chay lai ra y het, test case luon tai lap duoc
 
@@ -15,6 +20,9 @@ PROVIDERS = {
     "TT01": {"ten": "Trung tâm Anh ngữ BrightPath", "loai": "trung tâm offline", "khu_vuc": "Hà Nội", "danh_gia": 4.6},
     "TT02": {"ten": "CodeCamp Academy", "loai": "trung tâm offline", "khu_vuc": "Hà Nội", "danh_gia": 4.7},
     "TT03": {"ten": "MarketPro Training", "loai": "trung tâm offline", "khu_vuc": "TP.HCM", "danh_gia": 4.4},
+    "NT03": {"ten": "LearnHub", "loai": "nền tảng online", "khu_vuc": "toàn quốc", "danh_gia": 4.2},
+    "TT04": {"ten": "Trung tâm Ngoại ngữ Sakura", "loai": "trung tâm offline", "khu_vuc": "TP.HCM", "danh_gia": 4.5},
+    "TT05": {"ten": "STEM Academy", "loai": "trung tâm offline", "khu_vuc": "Hà Nội", "danh_gia": 4.6},
 }
 
 INSTRUCTORS = {
@@ -24,6 +32,12 @@ INSTRUCTORS = {
     "GV04": {"ten": "Phạm Đức Cường", "chuyen_mon": ["dữ liệu", "SQL"], "danh_gia": 4.5, "kinh_nghiem": 5},
     "GV05": {"ten": "Vũ Thị Mai", "chuyen_mon": ["thiết kế", "đồ họa"], "danh_gia": 4.3, "kinh_nghiem": 4},
     "GV06": {"ten": "Đỗ Hoàng Nam", "chuyen_mon": ["marketing", "content"], "danh_gia": 4.4, "kinh_nghiem": 7},
+    "GV07": {"ten": "Nguyễn Hải Sơn", "chuyen_mon": ["vật lý", "toán"], "danh_gia": 4.6, "kinh_nghiem": 9},
+    "GV08": {"ten": "Trần Thu Hà", "chuyen_mon": ["tiếng Nhật", "tiếng Hàn"], "danh_gia": 4.5, "kinh_nghiem": 6},
+    "GV09": {"ten": "Lê Minh Quân", "chuyen_mon": ["tài chính", "kế toán"], "danh_gia": 4.4, "kinh_nghiem": 8},
+    "GV10": {"ten": "Phạm Ngọc Lan", "chuyen_mon": ["nhiếp ảnh", "thiết kế"], "danh_gia": 4.3, "kinh_nghiem": 5},
+    "GV11": {"ten": "Đỗ Văn Kiên", "chuyen_mon": ["âm nhạc"], "danh_gia": 4.7, "kinh_nghiem": 12},
+    "GV12": {"ten": "Vũ Thị Hạnh", "chuyen_mon": ["kỹ năng mềm", "quản trị"], "danh_gia": 4.5, "kinh_nghiem": 7},
 }
 
 
@@ -77,6 +91,49 @@ COURSES = dict([
     off("MK201", "Digital Marketing tổng quan", "TT03", ["marketing"], "cơ bản",
         6_000_000, "24 buổi", ["T7 09:00-11:30", "CN 09:00-11:30"],
         "2026-08-22", "2026-08-17", "TP.HCM", 35, 31, 4.4, True, "GV06"),
+
+    # --- Khoa hoc tu nhien ---
+    on("PH101", "Vật lý đại cương", "NT03", ["vật lý", "khoa học"], "mới bắt đầu",
+       1_200_000, "26 giờ", 740, 4.4, True, "GV07"),
+    off("PH201", "Vật lý luyện thi THPT", "TT05", ["vật lý", "khoa học"], "cơ bản",
+        4_500_000, "36 buổi", ["T3 19:00-21:00", "T5 19:00-21:00"],
+        "2026-09-05", "2026-08-30", "Hà Nội", 30, 17, 4.6, True, "GV07"),
+    on("MA101", "Toán cao cấp cơ bản", "NT03", ["toán", "khoa học"], "mới bắt đầu",
+       950_000, "24 giờ", 1120, 4.3, True, "GV07"),
+    on("MA201", "Toán tư duy cho lập trình", "NT03", ["toán", "lập trình"], "cơ bản",
+       1_700_000, "20 giờ", 630, 4.5, True, "GV07"),
+
+    # --- Ngoai ngu khac ---
+    off("JP101", "Tiếng Nhật N5", "TT04", ["tiếng Nhật", "ngoại ngữ"], "mới bắt đầu",
+        4_200_000, "30 buổi", ["T2 18:30-20:30", "T4 18:30-20:30"],
+        "2026-09-08", "2026-09-01", "TP.HCM", 25, 12, 4.5, True, "GV08"),
+    on("JP102", "Tiếng Nhật giao tiếp online", "NT03", ["tiếng Nhật", "giao tiếp"], "mới bắt đầu",
+       1_350_000, "28 giờ", 880, 4.2, True, "GV08"),
+    off("KR101", "Tiếng Hàn sơ cấp", "TT04", ["tiếng Hàn", "ngoại ngữ"], "mới bắt đầu",
+        3_900_000, "28 buổi", ["T3 18:30-20:30", "T5 18:30-20:30"],
+        "2026-09-08", "2026-09-01", "TP.HCM", 25, 20, 4.4, True, "GV08"),
+
+    # --- Tai chinh, ke toan ---
+    on("FI101", "Quản lý tài chính cá nhân", "NT03", ["tài chính"], "mới bắt đầu",
+       790_000, "12 giờ", 2410, 4.5, True, "GV09"),
+    on("FI201", "Đầu tư chứng khoán cơ bản", "NT02", ["tài chính", "đầu tư"], "cơ bản",
+       2_300_000, "22 giờ", 1360, 4.3, True, "GV09"),
+    on("AC101", "Kế toán cho người mới", "NT03", ["kế toán"], "mới bắt đầu",
+       1_600_000, "30 giờ", 690, 4.4, True, "GV09"),
+
+    # --- Nang khieu, ky nang ---
+    on("PT101", "Nhiếp ảnh cơ bản với điện thoại", "NT02", ["nhiếp ảnh"], "mới bắt đầu",
+       690_000, "14 giờ", 1580, 4.6, False, "GV10"),
+    on("UX201", "Thiết kế UI/UX", "NT02", ["thiết kế", "web"], "cơ bản",
+       3_200_000, "32 giờ", 940, 4.7, True, "GV10"),
+    off("MU101", "Guitar đệm hát cho người mới", "TT05", ["âm nhạc"], "mới bắt đầu",
+        2_800_000, "20 buổi", ["T7 09:00-11:00", "CN 09:00-11:00"],
+        "2026-08-29", "2026-08-24", "Hà Nội", 20, 11, 4.8, False, "GV11"),
+    on("SK101", "Kỹ năng thuyết trình", "NT01", ["kỹ năng mềm"], "mới bắt đầu",
+       1_100_000, "10 giờ", 1930, 4.4, True, "GV12"),
+    off("SK201", "Quản trị dự án cho người đi làm", "TT02", ["kỹ năng mềm", "quản trị"], "cơ bản",
+        7_500_000, "24 buổi", ["T6 18:30-20:30", "T7 09:00-11:00"],
+        "2026-09-12", "2026-09-05", "Hà Nội", 28, 19, 4.6, True, "GV12"),
 ])
 
 FIXED = {
