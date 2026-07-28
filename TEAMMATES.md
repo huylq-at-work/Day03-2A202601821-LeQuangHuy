@@ -17,8 +17,8 @@
 
 | Thành viên | Vai trò | Branch | File giữ | Hướng dẫn |
 | :-- | :-- | :-- | :-- | :-- |
-| Nguyễn Chí Hướng | Product Architect & Observability | `role1-product-architect` | `config/test_cases.json`, `docs/trace_eval.md` | [ROLE1](docs/roles/ROLE1_PRODUCT_ARCHITECT.md) |
-| Nguyễn Tiến Đạt | Tool Engineer | `role2-tool-engineer` | `src/tools.py` | [ROLE2](docs/roles/ROLE2_TOOL_ENGINEER.md) |
+| Nguyễn Tiến Đạt | Product Architect & Observability | `role1-product-architect` | `config/test_cases.json`, `docs/trace_eval.md` | [ROLE1](docs/roles/ROLE1_PRODUCT_ARCHITECT.md) |
+| Nguyễn Chí Hướng | Tool Engineer | `role2-tool-engineer` | `src/tools.py` | [ROLE2](docs/roles/ROLE2_TOOL_ENGINEER.md) |
 | Phạm Thị Liên | Prompt & Safeguard Engineer | `role3-prompt-engineer` | `src/prompts.py` | [ROLE3](docs/roles/ROLE3_PROMPT_ENGINEER.md) |
 | Lê Quang Huy | Core Developer / Integrator | `role4-core-developer` | `src/app.py` | [ROLE4](docs/roles/ROLE4_CORE_DEVELOPER.md) |
 

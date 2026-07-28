@@ -2,7 +2,7 @@
 
 | | |
 | :-- | :-- |
-| **Người đảm nhận** | Nguyễn Tiến Đạt — 2A202601387 |
+| **Người đảm nhận** | Nguyễn Chí Hướng — 2A202601203 |
 | **Branch** | `role2-tool-engineer` |
 | **File giữ** | `src/tools.py` |
 | **Trọng số điểm** | 30% (ReAct Implementation & Tools — chia với Role 4) |

@@ -2,7 +2,7 @@
 
 | | |
 | :-- | :-- |
-| **Người đảm nhận** | Nguyễn Chí Hướng — 2A202601203 |
+| **Người đảm nhận** | Nguyễn Tiến Đạt — 2A202601387 |
 | **Branch** | `role1-product-architect` |
 | **File giữ** | `config/test_cases.json` + `docs/trace_eval.md` |
 | **Trọng số điểm** | 20% (Agentic Fit & Test Design) + 10% (Hybrid Flowchart) |
