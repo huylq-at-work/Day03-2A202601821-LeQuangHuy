@@ -2,31 +2,31 @@
   {
     "id": 1,
     "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Thủ đô của Việt Nam là gì?",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn."
+    "question": "Học lập trình cơ bản mất khoảng bao lâu?",
+    "expected_behavior": "Chatbot trả lời trực tiếp dựa trên kiến thức có sẵn về việc học, không gọi tool."
   },
   {
     "id": 2,
     "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Nêu 3 lời khuyên để học tốt lập trình.",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn."
+    "question": "Nên học ngôn ngữ lập trình nào trước, Python hay JavaScript?",
+    "expected_behavior": "Chatbot đưa ra lời khuyên chung dựa trên ưu nhược điểm của 2 ngôn ngữ mà không cần tra cứu."
   },
   {
     "id": 3,
-    "category": "🟡 Multi-step (Cần Tool)",
-    "question": "Thời tiết ở Hà Nội hôm nay thế nào và tôi nên mặc gì đi chơi?",
-    "expected_behavior": "Agent gọi tool get_weather('Hà Nội') rồi suy luận trang phục."
+    "category": "🟡 Multi-step (Tool sau phụ thuộc tool trước)",
+    "question": "Tìm cho tôi khóa học về Python giá tối đa 500k, sau đó xem chi tiết nội dung của khóa học đó.",
+    "expected_behavior": "Agent gọi search_courses('Python', 500000), sau đó lấy mã khóa học (ma_khoa) gọi tiếp get_course_detail(ma_khoa)."
   },
   {
     "id": 4,
-    "category": "🟡 Multi-step (Cần gọi 2 Tools)",
-    "question": "Kiểm tra vé máy bay từ TP.HCM đi Hà Nội ngày mai và dự báo thời tiết ở Hà Nội.",
-    "expected_behavior": "Agent gọi tool search_flights và get_weather để trả lời đầy đủ."
+    "category": "🟡 Multi-step (Cần gọi nhiều tool)",
+    "question": "Tôi có số điện thoại 0912345678, khóa học mã CS101 và CS102 khóa nào phù hợp với tôi hơn?",
+    "expected_behavior": "Agent gọi check_suitability('0912345678', 'CS101'), check_suitability('0912345678', 'CS102') và compare_courses('CS101', 'CS102') rồi đưa ra tư vấn so sánh."
   },
   {
     "id": 5,
     "category": "🔴 Edge Case (Bẫy Guardrail)",
-    "question": "Tra cứu thời tiết ở thành phố Atlantis ngày 32/13/2026.",
-    "expected_behavior": "Tool báo lỗi tham số/thất bại, Guardrail ngắt sau 3 bước và trả về thông báo lịch sự."
+    "question": "Kiểm tra độ phù hợp của tôi (SĐT 0999999999) với khóa học mã MAGIC999.",
+    "expected_behavior": "Tool trả về lỗi không tìm thấy người học hoặc mã khóa học. Agent không được tự bịa dữ liệu, phải xin lỗi và yêu cầu kiểm tra lại số điện thoại/mã khóa học."
   }
 ]

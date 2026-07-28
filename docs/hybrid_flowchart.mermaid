@@ -1,0 +1,9 @@
+flowchart TD
+    A[Câu hỏi của khách hàng] --> B{Có cần dữ liệu<br/>học viên / khóa học trên sàn?}
+    B -- Không --> C[Chatbot Path<br/>LLM trả lời trực tiếp]
+    B -- Có --> D[ReAct Agent Path]
+    D --> E[Thought → Action → Observation]
+    E --> F{Đã đủ thông tin?}
+    F -- Chưa --> E
+    F -- Rồi --> G[Final Answer]
+    E -.-> H[🛡️ MAX_ITERATIONS<br/>ngắt lặp vô tận]

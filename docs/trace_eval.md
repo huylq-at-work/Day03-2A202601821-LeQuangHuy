@@ -1,32 +1,32 @@
-# 📊 BÁO CÁO GIÁM SÁT & ĐÁNH GIÁ (OBSERVABILITY TRACE LOGS)
-*Dành cho Role 5: Observability & Reviewer*
+# 🟢 Role 1: Đánh Giá Agentic Fit & Trace Log
 
----
+## 1. Scoring Matrix (Đánh giá độ phù hợp của Agent)
 
-## 🎯 1. BẢNG CHẤM ĐIỂM AGENTIC FIT (SCORING MATRIX)
+| Tiêu chí | Câu hỏi tự vấn | Điểm (1–5) | Lý do cụ thể cho đề tài Trợ lý tư vấn khóa học (Sàn Marketplace) |
+| :-- | :-- | :-: | :-- |
+| **Cần dữ liệu ngoài?** | Trả lời được không nếu không tra cứu gì? | 5 | Bắt buộc phải tra cứu thông tin học viên (get_learner), danh sách khóa học (search_courses), giá tiền, và nhà cung cấp (get_provider). LLM không thể tự biết khóa học nào đang có trên sàn. |
+| **Nhiều bước?** | Có phải gọi tool này rồi mới biết gọi tool kia? | 5 | Thường xuyên phải tìm khóa học (search_courses), có mã khóa (ma_khoa) rồi mới xem chi tiết (get_course_detail) hoặc kiểm tra độ phù hợp (check_suitability). |
+| **Có thao tác thật?** | Agent có phải *làm* gì không, hay chỉ nói? | 2 | Chủ yếu là truy vấn đọc (Read) dữ liệu để tư vấn, so sánh khóa học, không có thao tác mua/thanh toán trực tiếp. |
+| **Rủi ro nếu sai?** | Sai thì hậu quả thế nào, có cần Guardrail? | 4 | Tư vấn sai giá, sai nhà cung cấp hoặc sai thông tin khóa học sẽ làm sai lệch quyết định mua của khách hàng. Cần guardrail không bịa khóa học. |
 
-| Tiêu chí | Điểm (1-5) | Lý do đánh giá |
-| :--- | :---: | :--- |
-| 🧠 **Multi-step Reasoning** | `4/5` | Cần suy luận từ tra cứu thời tiết đến chọn trang phục. |
-| 🛠️ **Tool Interaction** | `5/5` | Cần tra cứu dữ liệu thời gian thực qua API thời tiết/chuyến bay. |
-| 🔀 **Dynamic Decision** | `4/5` | Kết quả bước trước quyết định hành động bước sau. |
-| ⏳ **Long Horizon** | `3/5` | Quy trình gồm 2-3 bước xử lý ngắn. |
-| **TỔNG ĐIỂM FIT** | **16/20** | **KẾT LUẬN: BÀI TOÁN RẤT NÊN DÙNG REACT AGENT!** |
+## 2. Trace Log (Kết quả chạy Test Cases)
 
----
+*(Chờ Role 4 hoàn thành Agent, bạn chạy 5 câu hỏi trong file `config/test_cases.json` và dán log quá trình suy nghĩ Thought-Action-Observation của Agent vào đây nhé)*
 
-## 🔍 2. SO SÁNH PHẢN HỒI (TEST CASE #3)
+### Test Case 3 — Multi-step
+**Câu hỏi**: Tìm cho tôi khóa học về Python giá tối đa 500k, sau đó xem chi tiết nội dung của khóa học đó.
+**Log**:
+*(Dán nội dung log vào đây - ví dụ gọi search_courses rồi get_course_detail)*
+**Nhận xét**: *(Ví dụ: Agent tìm được khóa học và gọi đúng tool xem chi tiết dựa trên mã khóa học tìm được)*
 
-**Câu hỏi**: *"Thời tiết ở Hà Nội hôm nay thế nào và tôi nên mặc gì đi chơi?"*
+### Test Case 4 — Multi-step
+**Câu hỏi**: Tôi có số điện thoại 0912345678, khóa học mã CS101 và CS102 khóa nào phù hợp với tôi hơn?
+**Log**:
+*(Dán nội dung log vào đây - ví dụ gọi check_suitability và compare_courses)*
+**Nhận xét**: *(Ví dụ: Agent phân tích thông tin trả về, so sánh các điểm tương đồng và tư vấn rất chính xác)*
 
-### 🤖 Chatbot Baseline:
-* **Phản hồi**: *"Tôi không có truy cập Internet thời gian thực nên không biết thời tiết hôm nay ở Hà Nội."*
-* **Nhận xét**: An toàn nhưng không giải quyết được nhu cầu thực tế của người dùng.
-
-### 🧠 ReAct Agent:
-* **Thought 1**: Cần tra cứu thời tiết Hà Nội.
-* **Action 1**: `get_weather['Hà Nội']`
-* **Observation 1**: `Thời tiết Hà Nội: 28°C, Nắng nhẹ, Độ ẩm 65%.`
-* **Thought 2**: Đã có thông tin 28°C nắng nhẹ, đưa ra lời khuyên trang phục.
-* **Final Answer**: *"Thời tiết Hà Nội hôm nay 28°C, nắng nhẹ. Bạn nên mặc quần áo thoáng mát!"*
-* **Nhận xét**: Hoàn thành xuất sắc nhiệm vụ nhờ sự kết hợp giữa suy luận và công cụ.
+### Test Case 5 — Edge Case (Bẫy)
+**Câu hỏi**: Kiểm tra độ phù hợp của tôi (SĐT 0999999999) với khóa học mã MAGIC999.
+**Log**:
+*(Dán nội dung log vào đây)*
+**Nhận xét**: *(Ví dụ: Agent báo lỗi lịch sự khi không tìm thấy học viên hoặc khóa học, Guardrail hoạt động tốt)*
