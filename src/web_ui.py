@@ -24,10 +24,13 @@ except Exception:
 from tools import AVAILABLE_TOOLS
 from prompts import CHATBOT_BASELINE_PROMPT, MAX_ITERATIONS
 from providers import get_llm_provider
-from app import react_steps, load_test_cases
+from app import react_steps, load_test_cases, BoNho, lap_ke_hoach
 
 PORT = 8765
 provider = get_llm_provider()
+
+# Bộ nhớ cho chế độ Autonomous (Cấp 4), dùng chung cả phiên, xóa khi bấm "Xóa hội thoại"
+bo_nho = BoNho()
 
 PAGE = r"""<!doctype html>
 <meta charset="utf-8">
@@ -122,6 +125,7 @@ footer{border-top:1px solid var(--line);background:var(--bg);padding:13px 18px 1
   <div class="seg">
     <button id="m-agent" class="on">ReAct Agent</button>
     <button id="m-bot">Chatbot thường</button>
+    <button id="m-auto" title="Cấp 4: tự lập kế hoạch + nhớ dữ kiện đã tra">Autonomous</button>
   </div>
   <span class="spacer"></span>
   <span class="badge" id="bd-prov"></span>
@@ -163,23 +167,32 @@ fetch("/api/info").then(r=>r.json()).then(d=>{
   render();
 });
 
-function veTrace(steps){
+function veTrace(steps, ke_hoach){
   const nTool = steps.filter(b=>b.loai==="tool").length;
+  const nNho = steps.filter(b=>b.tu_bo_nho).length;
   const coLoi = steps.some(b=>b.loi);
   const guard = steps.some(b=>b.loai==="guardrail");
   let nhan = `Đã suy nghĩ ${steps.length} bước`;
+  if(ke_hoach && ke_hoach.length) nhan += ` · lập ${ke_hoach.length} bước kế hoạch`;
   if(nTool) nhan += ` · gọi ${nTool} công cụ`;
+  if(nNho) nhan += ` · ${nNho} lần dùng bộ nhớ`;
   if(coLoi) nhan += " · có lỗi tra cứu";
   if(guard) nhan += " · chạm Guardrail";
 
-  const body = steps.map(b=>{
+  const kh = (ke_hoach && ke_hoach.length)
+    ? `<div class="step"><div class="vg">📋 Kế hoạch tự vạch</div>` +
+      ke_hoach.map((b,i)=>`<div class="row"><span class="ico">${i+1}</span><span class="th">${esc(b)}</span></div>`).join("") +
+      `</div>` : "";
+
+  const body = kh + steps.map(b=>{
     if(b.loai==="guardrail")
       return `<div class="note"><b>Guardrail ngắt vòng lặp</b><br>Đã chạm giới hạn ${b.vong} vòng mà chưa ra kết quả.</div>`;
     let h = `<div class="step"><div class="vg">Vòng ${b.vong}</div>`;
     if(b.thought) h += `<div class="row"><span class="ico">💭</span><span class="th">${esc(b.thought)}</span></div>`;
     if(b.loai==="tool"){
       h += `<div class="row"><span class="ico">🛠</span><span class="act">${esc(b.tool)}[${esc((b.args||[]).join(", "))}]</span></div>`;
-      h += `<div class="row"><span class="ico">👁</span><span class="obs ${b.loi?"bad":""}">${esc(b.observation)}</span></div>`;
+      const nho = b.tu_bo_nho ? ` <b>🧠 lấy từ bộ nhớ, không gọi tool</b>` : "";
+    h += `<div class="row"><span class="ico">👁</span><span class="obs ${b.loi?"bad":""}">${esc(b.observation)}${nho}</span></div>`;
     }
     if(b.loai==="sai_dinh_dang")
       h += `<div class="note"><b>LLM trả sai định dạng</b><br>Không bóc được Action nên dừng an toàn.</div>`;
@@ -205,7 +218,7 @@ function render(){
     if(m.dang) return `<div class="msg"><div class="who">${m.nhan}</div>
       <div class="dots"><span></span><span></span><span></span></div></div>`;
     return `<div class="msg"><div class="who">${m.nhan}</div>
-      ${m.steps && m.steps.length ? veTrace(m.steps) : ""}
+      ${m.steps && m.steps.length ? veTrace(m.steps, m.ke_hoach) : ""}
       <div class="ans">${esc(m.content)}</div></div>`;
   }).join("");
   thread.parentElement.scrollTop = thread.parentElement.scrollHeight;
@@ -214,7 +227,7 @@ function render(){
 async function hoi(q){
   if(busy || !q.trim()) return;
   busy = true; $("go").disabled = true;
-  const nhan = mode==="agent" ? "ReAct Agent" : "Chatbot thường";
+  const nhan = mode==="agent" ? "ReAct Agent" : mode==="auto" ? "Autonomous Agent (Cấp 4)" : "Chatbot thường";
   msgs.push({role:"user", content:q});
   msgs.push({role:"bot", dang:true, nhan});
   render();
@@ -228,7 +241,7 @@ async function hoi(q){
     const r = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
               body:JSON.stringify({question:q, mode, lich_su})});
     const d = await r.json();
-    msgs[msgs.length-1] = {role:"bot", nhan, content:d.answer, steps:d.steps||[]};
+    msgs[msgs.length-1] = {role:"bot", nhan, content:d.answer, steps:d.steps||[], ke_hoach:d.ke_hoach||[]};
   }catch(e){
     msgs[msgs.length-1] = {role:"bot", nhan, content:"Lỗi kết nối: "+e, steps:[]};
   }
@@ -242,7 +255,7 @@ ta.addEventListener("keydown", e=>{
   if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); const v=ta.value; ta.value=""; ta.style.height="auto"; hoi(v); }
 });
 $("go").onclick = ()=>{ const v=ta.value; ta.value=""; ta.style.height="auto"; hoi(v); };
-$("clear").onclick = ()=>{ msgs=[]; render(); };
+$("clear").onclick = ()=>{ msgs=[]; render(); fetch("/api/reset",{method:"POST"}); };
 
 function apDungTheme(t){
   document.documentElement.setAttribute("data-theme", t);
@@ -252,8 +265,11 @@ function apDungTheme(t){
 apDungTheme(localStorage.getItem("theme") || "light");
 $("theme").onclick = ()=>
   apDungTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
-$("m-agent").onclick = ()=>{ mode="agent"; $("m-agent").className="on"; $("m-bot").className=""; };
-$("m-bot").onclick = ()=>{ mode="bot"; $("m-bot").className="on"; $("m-agent").className=""; };
+function chonCheDo(m){ mode=m;
+  ["agent","bot","auto"].forEach(x=>$("m-"+x).className = (x===m ? "on" : "")); }
+$("m-agent").onclick = ()=>chonCheDo("agent");
+$("m-bot").onclick   = ()=>chonCheDo("bot");
+$("m-auto").onclick  = ()=>chonCheDo("auto");
 </script>
 """
 
@@ -284,6 +300,11 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, PAGE, "text/html")
 
     def do_POST(self):
+        # Xóa bộ nhớ Cấp 4 — gửi không kèm body nên phải xử lý trước khi parse JSON
+        if self.path.startswith("/api/reset"):
+            bo_nho.xoa()
+            return self._send(200, '{"ok":true}', "application/json")
+
         n = int(self.headers.get("Content-Length", 0))
         try:
             d = json.loads(self.rfile.read(n))
@@ -303,15 +324,20 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, json.dumps({"answer": tra_loi, "steps": []},
                                               ensure_ascii=False), "application/json")
 
-        # ReAct Agent: chạy vòng lặp, câu trả lời nằm ở bước cuối
+        # ReAct Agent (Cấp 3) hoặc Autonomous (Cấp 4: Planning + Memory)
+        ke_hoach = []
         try:
-            buoc = react_steps(cau_hoi, provider, lich_su)
+            if che_do == "auto":
+                ke_hoach = lap_ke_hoach(cau_hoi, provider, lich_su)
+                buoc = react_steps(cau_hoi, provider, lich_su, bo_nho, ke_hoach)
+            else:
+                buoc = react_steps(cau_hoi, provider, lich_su)
             cuoi = buoc[-1] if buoc else {}
             tra_loi = cuoi.get("final") or "Mình chưa đưa ra được câu trả lời."
         except Exception as e:
             buoc, tra_loi = [], f"Lỗi khi chạy vòng lặp: {e}"
 
-        self._send(200, json.dumps({"answer": tra_loi, "steps": buoc},
+        self._send(200, json.dumps({"answer": tra_loi, "steps": buoc, "ke_hoach": ke_hoach},
                                    ensure_ascii=False), "application/json")
 
     def log_message(self, *a):

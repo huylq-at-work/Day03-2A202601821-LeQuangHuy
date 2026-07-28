@@ -118,14 +118,33 @@ Hồ sơ để test nhanh:
 
 ---
 
-## 🎁 BONUS +10% — Autonomous Agent (Cấp 4)
+## 🎁 BONUS +10% — Autonomous Agent (Cấp 4) — ĐÃ LÀM
 
-Nếu còn thời gian, thêm 1 trong 2 vào `src/app.py`:
+Làm **cả hai** năng lực, đều nằm trong `src/app.py`:
 
-- **Planning**: trước khi vào vòng lặp, hỏi LLM "chia mục tiêu này thành các bước nhỏ" rồi chạy từng bước
-- **Memory**: lưu `dict` ghi nhớ số điện thoại học viên đã hỏi, lần sau không cần hỏi lại
+| Thành phần | Hàm | Việc |
+| :-- | :-- | :-- |
+| **Planning** | `lap_ke_hoach()` | Trước khi vào vòng lặp, hỏi LLM chia mục tiêu thành tối đa 4 bước, rồi chèn kế hoạch vào history |
+| **Memory** | `class BoNho` | Nhớ kết quả tool đã tra. Lượt sau hỏi lại cùng thứ thì lấy từ bộ nhớ, không gọi tool |
+| Demo | `run_autonomous_agent()` | Ghép cả hai, in kế hoạch và đánh dấu 🧠 khi dùng bộ nhớ |
 
-Tham khảo [`src/ai_levels/level4_autonomous_agent.py`](../../src/ai_levels/level4_autonomous_agent.py).
+Chạy demo:
+
+```bash
+.venv\Scripts\python.exe src\app.py auto
+```
+
+Kịch bản: hỏi 2 lượt về cùng một học viên. Lượt 2 lấy hồ sơ từ bộ nhớ thay vì gọi lại `get_learner` — đó chính là điểm khác so với Cấp 3.
+
+Trên giao diện web có nút **Autonomous** ở header, hiện kế hoạch tự vạch và đánh dấu bước nào lấy từ bộ nhớ.
+
+### Ba quyết định đáng nói khi phản biện
+
+**Chỉ cache tool chỉ-đọc.** `dang_ky_hoc_vien` ghi dữ liệu nên tuyệt đối không cache — cache thì lần đăng ký thứ hai bị bỏ qua, dữ liệu sai. Danh sách trắng nằm ở `TOOL_CHI_DOC`.
+
+**Không nhớ kết quả `LỖI:`.** Người dùng gõ nhầm số điện thoại rồi gõ lại đúng thì phải tra lại thật, không được trả lỗi cũ từ cache.
+
+**Planning tốn thêm khoảng 1 vòng lặp.** Đo thực tế trên cùng câu hỏi: ReAct thường dùng 5 vòng, Autonomous dùng 6/6 vì kế hoạch khiến Agent kiểm tra kỹ hơn (so sánh khóa, thử nhiều khóa). Nếu `MAX_ITERATIONS` để chật quá thì chế độ Autonomous dễ chạm Guardrail hơn Cấp 3 — đây là đánh đổi có thật, không phải lỗi.
 
 ---
 

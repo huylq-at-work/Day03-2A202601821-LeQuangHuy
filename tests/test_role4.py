@@ -168,6 +168,70 @@ else:
          "Thiếu hàm chặn LLM tự bịa Observation")
 
 # ---------------------------------------------------------------- môi trường
+c.muc("[6B] 🎁 BONUS — Agent Cấp 4: Planning + Memory")
+
+BoNho = getattr(app, "BoNho", None)
+c.ok("Có lớp BoNho (Memory)", BoNho is not None, "Thiếu lớp BoNho trong app.py")
+c.ok("Có hàm lap_ke_hoach() (Planning)", callable(getattr(app, "lap_ke_hoach", None)),
+     "Thiếu hàm lap_ke_hoach() trong app.py")
+c.ok("Có run_autonomous_agent()", callable(getattr(app, "run_autonomous_agent", None)),
+     "Thiếu hàm demo run_autonomous_agent()")
+
+if BoNho:
+    bn = BoNho()
+    t0 = next(iter(app.AVAILABLE_TOOLS), "get_learner")
+
+    c.ok("Chưa gọi thì không nhớ gì", bn.nho_lai(t0, ["x"]) is None,
+         "BoNho phải trả None khi chưa từng gọi tool đó")
+
+    bn.ghi_nho(t0, ["x"], "ket qua A")
+    c.ok("Nhớ lại đúng kết quả đã ghi", bn.nho_lai(t0, ["x"]) == "ket qua A",
+         "BoNho không trả lại đúng observation đã nhớ")
+    c.ok("Đếm được số lần tiết kiệm gọi tool", bn.so_lan_dung == 1,
+         "BoNho phải đếm số lần tái dùng để chứng minh Memory có tác dụng")
+
+    c.ok("Tham số khác thì không nhầm sang cache cũ", bn.nho_lai(t0, ["y"]) is None,
+         "Cache phải phân biệt theo tham số, không được trả nhầm kết quả")
+
+    bn.ghi_nho(t0, ["z"], "LỖI: không tìm thấy")
+    c.ok("KHÔNG nhớ kết quả lỗi", bn.nho_lai(t0, ["z"]) is None,
+         "Không được cache kết quả LỖI — lần sau người dùng có thể nhập đúng")
+
+    # Tool ghi dữ liệu tuyệt đối không được cache
+    if "dang_ky_hoc_vien" in app.AVAILABLE_TOOLS:
+        bn.ghi_nho("dang_ky_hoc_vien", ["0900000000"], "Đã tạo hồ sơ")
+        c.ok("KHÔNG cache tool ghi dữ liệu (dang_ky_hoc_vien)",
+             bn.nho_lai("dang_ky_hoc_vien", ["0900000000"]) is None,
+             "Cache tool ghi sẽ khiến lần đăng ký thứ hai bị bỏ qua — dữ liệu sai")
+
+    bn.xoa()
+    c.ok("Xóa được bộ nhớ", not bn.cache and bn.so_lan_dung == 0,
+         "BoNho.xoa() phải dọn sạch cache và bộ đếm")
+
+# Memory phải thực sự cắt được lời gọi tool trong vòng lặp
+if BoNho and app and callable(getattr(app, "run_react_agent", None)) and app.AVAILABLE_TOOLS:
+    # Phải dùng tham số cho ra kết quả THÀNH CÔNG — kết quả LỖI cố tình không được cache
+    t0, tham_so = ("get_learner", "0912345203") if "get_learner" in app.AVAILABLE_TOOLS \
+        else (next(iter(app.AVAILABLE_TOOLS)), "x")
+    bn = BoNho()
+
+    def chay_lai():
+        p = GiaLap([f"Thought: tra.\nAction: {t0}[{tham_so}]",
+                    "Thought: xong.\nFinal Answer: ok."])
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            return app.react_steps("test", p, None, bn, None)
+
+    b1 = chay_lai()
+    b2 = chay_lai()
+    tu_nho = [b for b in b2 if b.get("tu_bo_nho")]
+    c.ok("Lượt sau lấy observation từ bộ nhớ, không gọi lại tool",
+         len(tu_nho) >= 1,
+         "react_steps(bo_nho=...) phải đánh dấu tu_bo_nho=True khi tái dùng kết quả")
+    c.ok("Observation lấy từ bộ nhớ giống hệt lần gọi thật",
+         bool(tu_nho) and tu_nho[0]["observation"] == b1[0]["observation"],
+         "Kết quả từ bộ nhớ phải khớp với kết quả gọi tool thật")
+
 c.muc("[7] Môi trường chạy demo")
 
 env = duong_dan(".env")
@@ -178,10 +242,12 @@ co_key = False
 if os.path.exists(env):
     with open(env, encoding="utf-8") as fh:
         noi = fh.read()
-    co_key = any(
-        f"{k}=" in noi and not noi.split(f"{k}=")[1].split("\n")[0].strip().startswith(("your_", ""))
-        for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "OPENROUTER_API_KEY")
-    )
+    for k in ("GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "OPENROUTER_API_KEY"):
+        m = re.search(rf"^{k}=(.*)$", noi, re.M)
+        gia_tri = m.group(1).strip() if m else ""
+        if gia_tri and not gia_tri.startswith("your_"):
+            co_key = True
+            break
 c.ok("Đã điền API key thật", co_key,
      "Chưa có API key — MockProvider chỉ trả 1 câu cố định nên không demo được Final Answer")
 

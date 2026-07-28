@@ -123,7 +123,92 @@ LOI_XIN_LOI_GUARDRAIL = ("Xin lỗi, mình chưa tra được thông tin bạn c
                          "bộ phận hỗ trợ giúp mình nhé.")
 
 
-def react_steps(user_query: str, provider, lich_su=None):
+# ===========================================================================
+# 🎁 BONUS — AI CẤP 4: AUTONOMOUS AGENT
+# Cấp 3 (ReAct) chỉ phản ứng từng bước. Cấp 4 thêm hai năng lực:
+#   - Planning: tự chia mục tiêu thành các bước nhỏ TRƯỚC khi hành động
+#   - Memory  : nhớ dữ kiện đã tra, lượt sau không phải gọi lại tool
+# ===========================================================================
+
+# Tool chỉ đọc dữ liệu -> an toàn để nhớ lại kết quả.
+# dang_ky_hoc_vien GHI dữ liệu nên TUYỆT ĐỐI không được cache.
+TOOL_CHI_DOC = {"get_learner", "search_courses", "get_course_detail",
+                "check_suitability", "get_provider", "compare_courses", "list_topics"}
+
+
+class BoNho:
+    """
+    Memory cho Agent Cấp 4.
+
+    Nhớ kết quả các tool chỉ-đọc đã gọi trong phiên. Sang lượt hội thoại sau,
+    Agent hỏi lại cùng thứ thì lấy từ bộ nhớ thay vì gọi tool lần nữa.
+    """
+
+    def __init__(self):
+        self.cache = {}       # {(ten_tool, tham_so): observation}
+        self.so_lan_dung = 0  # đếm số lần thực sự tiết kiệm được một lần gọi tool
+
+    def _khoa(self, ten_tool, args):
+        return (ten_tool, tuple(args))
+
+    def nho_lai(self, ten_tool, args):
+        """Trả observation đã nhớ, hoặc None nếu chưa từng gọi."""
+        if ten_tool not in TOOL_CHI_DOC:
+            return None
+        obs = self.cache.get(self._khoa(ten_tool, args))
+        if obs is not None:
+            self.so_lan_dung += 1
+        return obs
+
+    def ghi_nho(self, ten_tool, args, observation):
+        # Không nhớ kết quả lỗi — lần sau có thể người dùng nhập đúng
+        if ten_tool in TOOL_CHI_DOC and not observation.strip().upper().startswith("LỖI"):
+            self.cache[self._khoa(ten_tool, args)] = observation
+
+    def tom_tat(self):
+        if not self.cache:
+            return "(chưa nhớ gì)"
+        return "; ".join(f"{t}[{', '.join(a)}]" for t, a in self.cache)
+
+    def xoa(self):
+        self.cache.clear()
+        self.so_lan_dung = 0
+
+
+def lap_ke_hoach(user_query: str, provider, lich_su=None):
+    """
+    Planning cho Agent Cấp 4: tự rã mục tiêu thành các bước nhỏ trước khi hành động.
+
+    Trả về danh sách bước dạng chuỗi. Lỗi thì trả list rỗng — Agent vẫn chạy
+    bình thường theo ReAct, chỉ mất phần lập kế hoạch.
+    """
+    ngu_canh = ""
+    for q, a in (lich_su or [])[-2:]:
+        ngu_canh += f"- Đã hỏi: {q}\n"
+
+    nhac = (
+        "Bạn là bộ phận lập kế hoạch của một trợ lý tư vấn khóa học.\n"
+        "Chia yêu cầu của người dùng thành TỐI ĐA 4 bước ngắn gọn, mỗi bước một dòng,\n"
+        "đánh số 1. 2. 3. — không giải thích, không viết gì thêm.\n"
+        "Nếu yêu cầu đơn giản, chỉ cần 1 bước.\n\n"
+        "Các công cụ có thể dùng: " + ", ".join(AVAILABLE_TOOLS) + "\n\n"
+        + (f"Ngữ cảnh trước đó:\n{ngu_canh}\n" if ngu_canh else "")
+        + f"Yêu cầu: {user_query}"
+    )
+    try:
+        tra_loi = provider.generate(nhac, system_prompt="")
+    except Exception:
+        return []
+
+    buoc = []
+    for dong in (tra_loi or "").splitlines():
+        dong = dong.strip()
+        if re.match(r"^\d+[.)]\s+", dong):
+            buoc.append(re.sub(r"^\d+[.)]\s+", "", dong))
+    return buoc[:4]
+
+
+def react_steps(user_query: str, provider, lich_su=None, bo_nho=None, ke_hoach=None):
     """
     Chạy vòng lặp ReAct và trả về danh sách bước dạng dict.
 
@@ -133,12 +218,18 @@ def react_steps(user_query: str, provider, lich_su=None):
 
     lich_su: danh sách [(câu hỏi, câu trả lời)] của các lượt trước,
              để hội thoại nhiều lượt vẫn nhớ ngữ cảnh.
+    bo_nho:  đối tượng BoNho (Cấp 4). Có thì tái dùng kết quả tool đã tra.
+    ke_hoach: danh sách bước do lap_ke_hoach() sinh ra (Cấp 4).
     """
     buoc = []
     history = ""
     for q, a in (lich_su or []):
         history += f"Câu hỏi: {q}\nFinal Answer: {a}\n"
     history += f"Câu hỏi: {user_query}\n"
+
+    if ke_hoach:
+        history += ("Kế hoạch đã vạch sẵn, hãy bám theo:\n"
+                    + "\n".join(f"  {i}. {b}" for i, b in enumerate(ke_hoach, 1)) + "\n")
 
     for vong in range(1, MAX_ITERATIONS + 1):
         # 1. Hỏi LLM xem bước tiếp theo làm gì
@@ -160,11 +251,20 @@ def react_steps(user_query: str, provider, lich_su=None):
                          "thought": thought, "final": LOI_XIN_LOI_SAI_DINH_DANG})
             return buoc
 
-        # 4. Gọi tool thật
-        observation = call_tool(tool_name, tool_args)
+        # 4. Gọi tool thật — hoặc lấy lại từ bộ nhớ nếu đã tra rồi (Cấp 4)
+        tu_bo_nho = False
+        observation = bo_nho.nho_lai(tool_name, tool_args) if bo_nho else None
+        if observation is not None:
+            tu_bo_nho = True
+        else:
+            observation = call_tool(tool_name, tool_args)
+            if bo_nho:
+                bo_nho.ghi_nho(tool_name, tool_args, observation)
+
         buoc.append({"vong": vong, "loai": "tool", "raw": reply, "thought": thought,
                      "tool": tool_name, "args": tool_args, "observation": observation,
-                     "loi": observation.strip().upper().startswith("LỖI")})
+                     "loi": observation.strip().upper().startswith("LỖI"),
+                     "tu_bo_nho": tu_bo_nho})
 
         # 5. Nối vào history để vòng sau LLM còn nhớ ngữ cảnh
         history += f"{reply}\nObservation: {observation}\n"
@@ -200,6 +300,51 @@ def run_react_agent(user_query: str, provider):
         print(f"Observation: {b['observation']}")
 
 
+def run_autonomous_agent(user_query: str, provider, bo_nho=None, lich_su=None):
+    """
+    🎁 BONUS — Agent Cấp 4: Planning + Memory.
+
+    Khác run_react_agent() ở hai chỗ:
+      1. Lập kế hoạch trước rồi mới vào vòng lặp
+      2. Dùng BoNho để không gọi lại tool đã tra
+    """
+    print(f"\n[AUTONOMOUS AGENT] Câu hỏi: {user_query}")
+
+    ke_hoach = lap_ke_hoach(user_query, provider, lich_su)
+    if ke_hoach:
+        print("\n--- 📋 PLANNING: tự chia mục tiêu ---")
+        for i, b in enumerate(ke_hoach, 1):
+            print(f"  {i}. {b}")
+    else:
+        print("\n--- 📋 PLANNING: không lập được kế hoạch, chạy ReAct thường ---")
+
+    if bo_nho is None:
+        bo_nho = BoNho()
+    truoc = bo_nho.so_lan_dung
+
+    for b in react_steps(user_query, provider, lich_su, bo_nho, ke_hoach):
+        if b["loai"] == "guardrail":
+            print(f"\n[GUARDRAIL] Đã chạm giới hạn {MAX_ITERATIONS} bước, ngắt lặp an toàn.")
+            print(f"Trả lời: {b['final']}")
+            return bo_nho
+
+        print(f"\n--- Vòng lặp ReAct (Step {b['vong']}/{MAX_ITERATIONS}) ---")
+        print(b["raw"])
+        if b["loai"] == "final":
+            break
+        if b["loai"] == "sai_dinh_dang":
+            print("[!] LLM không sinh đúng định dạng Action. Dừng an toàn.")
+            print(f"Trả lời: {b['final']}")
+            return bo_nho
+        nguon = " 🧠 (lấy từ bộ nhớ, không gọi tool)" if b.get("tu_bo_nho") else ""
+        print(f"Observation: {b['observation']}{nguon}")
+
+    tiet_kiem = bo_nho.so_lan_dung - truoc
+    print(f"\n--- 🧠 MEMORY: đang nhớ {len(bo_nho.cache)} kết quả tool"
+          f"{f', tiết kiệm {tiet_kiem} lần gọi ở lượt này' if tiet_kiem else ''} ---")
+    return bo_nho
+
+
 if __name__ == "__main__":
     print("=" * 50)
     print("ĐẠI HỌC VINUNI - BÀI LAB 3: CHATBOT VS REACT AGENT")
@@ -213,9 +358,32 @@ if __name__ == "__main__":
     tests = load_test_cases()
     print(f"Đã tải {len(tests)} test cases từ config/test_cases.json")
 
-    # Chạy 1 test case: python src/app.py 3
-    # Chạy tất cả:     python src/app.py all
+    # python src/app.py 3      -> chạy test case số 3
+    # python src/app.py all    -> chạy cả 5 test case
+    # python src/app.py auto   -> 🎁 demo Agent Cấp 4 (Planning + Memory)
     arg = sys.argv[1] if len(sys.argv) > 1 else "3"
+
+    if arg == "auto":
+        print("\n" + "=" * 50)
+        print("🎁 BONUS — AI CẤP 4: AUTONOMOUS AGENT")
+        print("=" * 50)
+        print("Hai lượt hỏi cùng một học viên. Lượt 2 phải lấy hồ sơ từ bộ nhớ,")
+        print("không gọi lại get_learner — đó là điểm khác so với Cấp 3.")
+
+        bo_nho = BoNho()
+        q1 = "Em là 0912345203, em muốn học AI thì nên đăng ký khóa nào?"
+        q2 = "Thế với ngân sách đó em học được môn thiết kế nào không?"
+
+        print("\n" + "-" * 50)
+        print("LƯỢT 1")
+        print("-" * 50)
+        bo_nho = run_autonomous_agent(q1, provider, bo_nho)
+
+        print("\n" + "-" * 50)
+        print("LƯỢT 2 (bộ nhớ đã có sẵn hồ sơ học viên)")
+        print("-" * 50)
+        run_autonomous_agent(q2, provider, bo_nho, lich_su=[(q1, "")])
+        sys.exit(0)
 
     if arg == "all":
         selected = tests
