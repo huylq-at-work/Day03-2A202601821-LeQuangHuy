@@ -140,8 +140,12 @@ for i, (nhom, cau, ky_vong) in enumerate(DON_TAN_CONG, 1):
 thung = sum(1 for r in ket_qua if r["canh_bao"])
 mo_hinh = getattr(provider, "model_name", "?")
 
+BAT_DAU = "<!-- BEGIN AUTO-AUDIT -->"
+KET_THUC = "<!-- END AUTO-AUDIT -->"
+
 md = [
     "# Biên bản Cross-Audit — Tấn công & Phòng thủ\n",
+    BAT_DAU + "\n",
     f"> Sinh tự động bằng `scripts/gen_cross_audit.py` trên `{ten_provider}` "
     f"(model `{mo_hinh}`), `MAX_ITERATIONS = {MAX_ITERATIONS}`.\n"
     "> Mỗi dòng dưới đây là output thật, chạy lại script là ra lại.\n",
@@ -186,19 +190,30 @@ md.append("| Giới hạn phạm vi (mục 1C) | `src/prompts.py` | Câu lạc �
 md.append("| Chống rò rỉ (mục 1D) | `src/prompts.py` | Injection, đòi system prompt, đòi dump dữ liệu |")
 md.append("| Guardrail vòng lặp | `src/app.py` + `MAX_ITERATIONS` | Câu cố tình gây lặp vô tận |")
 md.append("| Tool trả `LỖI:` thay vì crash | `src/tools.py` | Dữ liệu không tồn tại, ép Agent bịa |\n")
-md.append("## 5. [[CAN-DIEN]] Biên bản buổi thuyết trình trên lớp\n")
-md.append("> Phần trên là kết quả tự chạy. Phần này phải điền tay sau buổi cross-audit thật.\n"
-          "> Tìm nhanh mọi chỗ cần điền: `python scripts/viec_con_lai.py`\n")
-md.append("| Nhóm tấn công | Câu hỏi họ ném vào | Agent phản ứng thế nào | Nhóm mình phản biện |")
-md.append("| :-- | :-- | :-- | :-- |")
-md.append("| | | | |")
-md.append("| | | | |")
-md.append("| | | | |\n")
-md.append("**Tổng kết**: _(số đòn bị hỏi, số đòn Agent đỡ được, có câu nào làm lộ điểm yếu không)_\n")
-md.append("**Nhóm mình đi tấn công nhóm khác**: _(dùng câu nào, nhóm bạn dính lỗi gì)_\n")
+md.append(KET_THUC + "\n")
+
+# Muc 5 tro di la phan viet tay sau buoi thuyet trinh -> giu nguyen, khong ghi de.
+# Bug cu: script ghi de ca file nen chay lai la mat sach bien ban lop.
+cu = ""
+if os.path.exists(OUT):
+    with open(OUT, encoding="utf-8") as f:
+        cu = f.read()
+
+if KET_THUC in cu:
+    duoi = cu.split(KET_THUC, 1)[1].lstrip()
+elif "## 5." in cu:
+    duoi = "## 5." + cu.split("## 5.", 1)[1]
+else:
+    duoi = ("## 5. [[CAN-DIEN]] Biên bản buổi thuyết trình trên lớp\n\n"
+            "> Điền tay sau buổi cross-audit thật.\n\n"
+            "| Nhóm | Câu hỏi | Agent phản ứng | Nhận xét |\n"
+            "| :-- | :-- | :-- | :-- |\n"
+            "| | | | |\n\n"
+            "**Tổng kết**: _(số đòn bị hỏi, số đòn đỡ được, có lộ điểm yếu không)_\n\n"
+            "**Nhóm mình đi tấn công nhóm khác**: _(dùng câu nào, nhóm bạn dính lỗi gì)_\n")
 
 with open(OUT, "w", encoding="utf-8") as f:
-    f.write("\n".join(md))
+    f.write("\n".join(md) + "\n" + duoi)
 
 print(f"\nĐã ghi {OUT}")
 print(f"  {len(ket_qua)} đòn tấn công, {thung} bị thủng, {len(ket_qua) - thung} chặn được")
