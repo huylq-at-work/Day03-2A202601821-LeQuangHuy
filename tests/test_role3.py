@@ -1,0 +1,108 @@
+"""
+TEST ROLE 3 — Phạm Thị Liên (Prompt & Safeguard Engineer)
+Kiểm: src/prompts.py — prompt có đủ 4 phần chưa, tên tool có khớp registry của
+      Role 2 không, MAX_ITERATIONS đã đủ rộng cho chuỗi demo chưa.
+
+Chạy:  .venv\\Scripts\\python.exe tests\\test_role3.py
+"""
+
+import re
+import sys
+
+from _harness import Check
+
+c = Check("ROLE 3 — PROMPT & SAFEGUARD ENGINEER (Phạm Thị Liên)")
+
+# ---------------------------------------------------------------- nạp module
+c.muc("[1] Nạp src/prompts.py")
+
+prompts = None
+try:
+    import prompts as _p
+    prompts = _p
+    c.ok("import được prompts.py", True)
+except Exception as e:
+    c.ok("import được prompts.py", False, f"prompts.py lỗi: {type(e).__name__}: {e}")
+
+BASE = getattr(prompts, "CHATBOT_BASELINE_PROMPT", "") if prompts else ""
+REACT = getattr(prompts, "REACT_SYSTEM_PROMPT", "") if prompts else ""
+MAXIT = getattr(prompts, "MAX_ITERATIONS", None) if prompts else None
+
+# ---------------------------------------------------------------- baseline
+c.muc("[2] CHATBOT_BASELINE_PROMPT")
+c.ok("Đã khai báo và không rỗng", len(BASE.strip()) > 30,
+     "Viết CHATBOT_BASELINE_PROMPT trong prompts.py")
+c.ok("Nói rõ Chatbot KHÔNG có quyền truy cập dữ liệu",
+     ("không" in BASE.lower()) and
+     any(k in BASE.lower() for k in ("truy cập", "dữ liệu", "hệ thống")),
+     "Baseline prompt nên nói rõ Chatbot không truy cập được dữ liệu — để so sánh công bằng")
+c.ok("Không liệt kê tool nào (đúng bản chất baseline)",
+     "Action:" not in BASE,
+     "Baseline prompt không được nhắc tool, nếu không thì hết là baseline")
+
+# ---------------------------------------------------------------- react
+c.muc("[3] REACT_SYSTEM_PROMPT — 4 phần bắt buộc")
+c.ok("Đã khai báo và không rỗng", len(REACT.strip()) > 100,
+     "Viết REACT_SYSTEM_PROMPT trong prompts.py")
+c.ok("Phần 1: có liệt kê danh sách công cụ",
+     REACT.count("[") >= 3,
+     "Liệt kê rõ các tool dạng ten_tool[tham_so]")
+c.ok("Phần 2: có định dạng Thought / Action / Final Answer",
+     all(k in REACT for k in ("Thought:", "Action:", "Final Answer:")),
+     "Prompt phải nêu đủ 3 nhãn: Thought:, Action:, Final Answer:")
+c.ok("Phần 3: có ví dụ few-shot kèm Observation",
+     "Observation:" in REACT,
+     "Thêm ví dụ mẫu có cả Observation — LLM học định dạng qua ví dụ tốt hơn mô tả suông")
+c.ok("Phần 4: có quy tắc cấm bịa dữ liệu",
+     any(k in REACT.lower() for k in ("không bịa", "tuyệt đối không", "không được bịa")),
+     "Thêm quy tắc cấm bịa hồ sơ / khóa học / giá tiền")
+c.ok("Có dạy cách xử lý khi Observation trả LỖI",
+     "LỖI" in REACT,
+     "Dạy LLM: gặp 'LỖI:' thì dừng và báo lịch sự, không đoán bừa")
+
+# ---------------------------------------------------------------- đúng domain
+c.muc("[4] Bám đúng đề tài marketplace khóa học")
+tu_cu = [t for t in ("mssv", "sinh viên", "tiên quyết", "get_weather", "get_student")
+         if t.lower() in REACT.lower()]
+c.ok("Không còn dấu vết đề tài cũ", not tu_cu,
+     f"Còn sót: {', '.join(tu_cu)} — đề đã đổi sang marketplace khóa học bên ngoài")
+
+# ------------------------------------------------- KHỚP TÊN TOOL VỚI ROLE 2
+c.muc("[5] Tên tool trong prompt phải khớp AVAILABLE_TOOLS của Role 2")
+
+REG = {}
+try:
+    import tools
+    REG = getattr(tools, "AVAILABLE_TOOLS", {}) or {}
+except Exception:
+    pass
+
+if not REG:
+    c.bo_qua("So khớp tên tool", "Role 2 chưa xong tools.py, chưa kiểm được")
+else:
+    trong_prompt = set(re.findall(r"\b([a-z_]{4,})\s*\[", REACT))
+    thieu = [t for t in REG if t not in trong_prompt]
+    thua = [t for t in trong_prompt if t not in REG]
+
+    c.ok(f"Prompt liệt kê đủ {len(REG)} tool của Role 2", not thieu,
+         f"Prompt chưa nhắc tool: {', '.join(thieu)}")
+    c.ok("Prompt không bịa tool không tồn tại", not thua,
+         f"Prompt nhắc tool không có trong registry: {', '.join(thua)}"
+         " — Agent sẽ gọi tool ma và luôn nhận LỖI")
+
+# ---------------------------------------------------------------- guardrail
+c.muc("[6] Guardrails")
+c.ok("Đã khai báo MAX_ITERATIONS", isinstance(MAXIT, int),
+     "Khai báo MAX_ITERATIONS trong prompts.py")
+c.ok(f"MAX_ITERATIONS >= 5 (đang là {MAXIT})",
+     isinstance(MAXIT, int) and MAXIT >= 5,
+     f"MAX_ITERATIONS={MAXIT} quá chật. Chuỗi demo cần 4 vòng "
+     "(3 lần gọi tool + 1 lần chốt Final Answer) — để 3 là demo chết ở Guardrail")
+c.ok(f"MAX_ITERATIONS <= 8 (đang là {MAXIT})",
+     isinstance(MAXIT, int) and MAXIT <= 8,
+     f"MAX_ITERATIONS={MAXIT} quá rộng, câu bẫy sẽ chạy lòng vòng mà không ai thấy phanh đâu")
+c.ok("Có TIMEOUT_SECONDS", isinstance(getattr(prompts, "TIMEOUT_SECONDS", None), int),
+     "Khai báo TIMEOUT_SECONDS cho mỗi lần gọi tool")
+
+dat, tong = c.ket()
+sys.exit(0 if dat == tong else 1)

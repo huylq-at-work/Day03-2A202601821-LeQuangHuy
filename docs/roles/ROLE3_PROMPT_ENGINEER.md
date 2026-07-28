@@ -142,6 +142,25 @@ Khi Role 4 đã có app chạy, test nhanh bằng:
 
 ---
 
+## 🧪 Tự chấm — chạy bất cứ lúc nào
+
+```bash
+.venv\Scripts\python.exe tests\test_role3.py
+```
+
+Test này chấm 17 mục và in ra **chính xác còn phải sửa gì**. Quan trọng nhất, nó bắt được lỗi mà mắt thường rất khó thấy:
+
+> **So từng tên tool trong prompt của bạn với `AVAILABLE_TOOLS` của Role 2.**
+> Lệch một chữ (`get_learner` vs `get_hoc_vien`) là Agent gọi tool ma, luôn nhận `LỖI:`, và lặp tới khi chạm Guardrail. Nhìn code thì thấy cả hai đều "đúng", chỉ có test mới bắt được.
+
+Ngoài ra nó kiểm: prompt đủ 4 phần chưa, có ví dụ few-shot kèm `Observation` chưa, có quy tắc cấm bịa chưa, `MAX_ITERATIONS` có nằm trong khoảng 5–8 không.
+
+Chạy tới khi thấy `COVERAGE: 17/17` là xong phần bạn.
+
+> ℹ️ Mục so khớp tên tool sẽ hiện `[-]` (bỏ qua) cho tới khi Role 2 làm xong `tools.py`. Nhớ chạy lại sau khi Hướng push code.
+
+---
+
 ## ✅ Checklist
 
 - [ ] Mốc 1: Liệt kê ít nhất 5 Failure Modes
