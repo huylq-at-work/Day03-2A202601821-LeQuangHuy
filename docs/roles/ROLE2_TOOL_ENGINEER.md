@@ -5,6 +5,7 @@
 | **Người đảm nhận** | Nguyễn Chí Hướng — 2A202601203 |
 | **Branch** | `role2-tool-engineer` |
 | **File giữ** | `src/tools.py` |
+| **Đóng góp bổ sung** | `docs/trace_eval.md` — so sánh Chatbot thường và ReAct Agent |
 | **Trọng số điểm** | 30% (ReAct Implementation & Tools — chia với Role 4) |
 
 ---
@@ -201,6 +202,38 @@ Chạy tới khi thấy `COVERAGE: 18/18` là xong phần bạn.
 
 ---
 
+## 🌟 Công việc làm thêm — So sánh Chatbot thường và ReAct Agent
+
+Ngoài nhiệm vụ Tool Engineer, Role 2 còn thực hiện phần **so sánh thực nghiệm**
+giữa Chatbot thường và ReAct Agent trong
+[`docs/trace_eval.md`](../trace_eval.md#3-so-sánh-thực-nghiệm--chatbot-thường-và-react-agent).
+
+### Phạm vi thực hiện
+
+- Xây dựng kịch bản hội thoại nhiều lượt: đăng ký tài khoản, cung cấp hồ sơ,
+  tìm và yêu cầu gợi ý khóa Vật Lý.
+- Ghi nhận cách Chatbot thường trả lời trực tiếp bằng kiến thức chung mà không
+  truy vấn dữ liệu marketplace.
+- Phân tích luồng dự kiến của ReAct Agent qua các tool
+  `dang_ky_hoc_vien`, `search_courses` và `check_suitability`.
+- So sánh hai hệ thống theo nguồn dữ liệu, khả năng kiểm tra thông tin thiếu,
+  ghi nhớ nhiều lượt, cá nhân hóa, độ cụ thể và rủi ro bịa dữ liệu.
+- Chỉ ra giới hạn của phép thử: bản hội thoại chưa chứa raw
+  Thought–Action–Observation và hai chuỗi chưa phải A/B test tuyệt đối.
+
+### Kết quả
+
+| Hệ thống | Điểm trong kịch bản | Nhận xét |
+| :-- | :-: | :-- |
+| Chatbot thường | **0/10** | Trả lời chung, không tạo được hồ sơ và không đưa ra khóa Vật Lý cụ thể |
+| ReAct Agent | **9/10** | Thu thập thông tin, dùng dữ liệu khóa học thật và đưa ra lựa chọn cụ thể; còn thiếu raw trace |
+
+Phần làm thêm này minh họa trực tiếp giá trị của các tool do Role 2 xây dựng:
+thay vì để LLM tự đoán, Agent có thể lấy dữ liệu thật, chạy logic Python và dùng
+Observation làm bằng chứng cho câu trả lời cuối.
+
+---
+
 ## ✅ Checklist
 
 - [ ] Mốc 1: Load được `mock_database.json`, chốt danh sách tool với nhóm
@@ -209,6 +242,7 @@ Chạy tới khi thấy `COVERAGE: 18/18` là xong phần bạn.
 - [ ] Mốc 3: `check_suitability` kiểm đủ 5 chiều, trả **lý do cụ thể**
 - [ ] Mốc 3: Xử lý `si_so = null`, `lich_hoc = []`, `han_dang_ky = null`
 - [ ] Mốc 3: Đối chiếu đúng 6 dòng kết quả ở bảng trên
+- [x] Công việc thêm: So sánh Chatbot thường và ReAct Agent trong `trace_eval.md`
 
 ---
 

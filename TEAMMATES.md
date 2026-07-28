@@ -20,11 +20,11 @@
 | Thành viên | Vai trò | Branch | File giữ | Hướng dẫn |
 | :-- | :-- | :-- | :-- | :-- |
 | Nguyễn Tiến Đạt | Product Architect & Observability | `role1-product-architect` | `config/test_cases.json`, `docs/trace_eval.md` | [ROLE1](docs/roles/ROLE1_PRODUCT_ARCHITECT.md) |
-| Nguyễn Chí Hướng | Tool Engineer | `role2-tool-engineer` | `src/tools.py` | [ROLE2](docs/roles/ROLE2_TOOL_ENGINEER.md) |
+| Nguyễn Chí Hướng | Tool Engineer | `role2-tool-engineer` | `src/tools.py`,`docs/trace_eval.md` | [ROLE2](docs/roles/ROLE2_TOOL_ENGINEER.md) |
 | Phạm Thị Liên | Prompt & Safeguard Engineer | `role3-prompt-engineer` | `src/prompts.py` | [ROLE3](docs/roles/ROLE3_PROMPT_ENGINEER.md) |
 | Lê Quang Huy | Core Developer / Integrator | `role4-core-developer` | `src/app.py` | [ROLE4](docs/roles/ROLE4_CORE_DEVELOPER.md) |
 
-> Bài Lab gốc chia 5 vai; nhóm 4 người nên Role 5 (Observability) gộp vào Role 1 — người viết test case hiểu rõ nhất câu nào là bẫy nên soi trace log chính xác nhất.
+> Bài Lab gốc chia 5 vai; nhóm 4 người nên Role 5 (Observability) chia vào Role 1,2 
 
 ## 3. Quy trình Git
 
