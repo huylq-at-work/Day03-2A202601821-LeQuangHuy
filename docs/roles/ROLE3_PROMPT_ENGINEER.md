@@ -1,4 +1,4 @@
-# 🧠 ROLE 3 — PROMPT & SAFEGUARD ENGINEER
+# ROLE 3 — PROMPT & SAFEGUARD ENGINEER
 
 | | |
 | :-- | :-- |
@@ -9,19 +9,19 @@
 
 ---
 
-## 🎯 Đề tài & việc của bạn
+## Đề tài & việc của bạn
 
 **Trợ Lý Đăng Ký Khóa Học — marketplace khóa học bên ngoài**. Học viên định danh bằng **số điện thoại**.
 
 Bạn viết **lời chỉ dẫn cho LLM** và lắp **phanh an toàn**.
 
-Đây là vai then chốt: nếu prompt không ép được LLM sinh đúng định dạng `Thought / Action`, code của Role 4 **không đọc ra tên tool** → cả vòng lặp ReAct sập. Prompt của bạn là hợp đồng giữa LLM và code.
+Đây là vai then chốt: nếu prompt không ép được LLM sinh đúng định dạng `Thought / Action`, code của Role 4 **không đọc ra tên tool**  cả vòng lặp ReAct sập. Prompt của bạn là hợp đồng giữa LLM và code.
 
-> 📖 **Đọc trước khi viết prompt**: [SCHEMA_FOR_PROMPT.md](../SCHEMA_FOR_PROMPT.md) — bản rút gọn 7 KB gồm từ vựng dữ liệu hợp lệ, đủ 13 mã khóa học, và **hình dạng Observation thật** mà mỗi tool trả về. Ví dụ few-shot trong prompt phải khớp với những chuỗi đó, nếu không LLM sẽ học sai định dạng.
+>  **Đọc trước khi viết prompt**: [SCHEMA_FOR_PROMPT.md](../SCHEMA_FOR_PROMPT.md) — bản rút gọn 7 KB gồm từ vựng dữ liệu hợp lệ, đủ 13 mã khóa học, và **hình dạng Observation thật** mà mỗi tool trả về. Ví dụ few-shot trong prompt phải khớp với những chuỗi đó, nếu không LLM sẽ học sai định dạng.
 
 ---
 
-## 📍 MỐC 1 (20 phút) — Liệt kê Failure Modes
+## MỐC 1 (20 phút) — Liệt kê Failure Modes
 
 | Failure Mode | Mô tả | Cách chặn |
 | :-- | :-- | :-- |
@@ -33,7 +33,7 @@ Bạn viết **lời chỉ dẫn cho LLM** và lắp **phanh an toàn**.
 
 ---
 
-## 📍 MỐC 2 (30 phút) — Chatbot Baseline Prompt
+## MỐC 2 (30 phút) — Chatbot Baseline Prompt
 
 Prompt này cố tình **không có tool** — để cả nhóm thấy Chatbot thua ở đâu:
 
@@ -45,11 +45,11 @@ Nếu không biết thông tin thực tế, hãy lịch sự thông báo cho ng�
 """
 ```
 
-> 💡 Đừng làm prompt này quá tệ để "dìm hàng" Chatbot. Nó phải là baseline **công bằng** — có vậy so sánh mới thuyết phục.
+>  Đừng làm prompt này quá tệ để "dìm hàng" Chatbot. Nó phải là baseline **công bằng** — có vậy so sánh mới thuyết phục.
 
 ---
 
-## 📍 MỐC 3 (60 phút) — ReAct System Prompt
+## MỐC 3 (60 phút) — ReAct System Prompt
 
 Phải chứa đủ 4 thành phần:
 
@@ -107,17 +107,17 @@ BẮT ĐẦU:
 
 ---
 
-## 🛡️ MỐC 3 (tiếp) — Guardrails
+## MỐC 3 (tiếp) — Guardrails
 
 ```python
-# 🛡️ PHANH AN TOÀN
+# PHANH AN TOÀN
 MAX_ITERATIONS = 5    # Tối đa 5 vòng Thought-Action, tránh lặp vô tận
 TIMEOUT_SECONDS = 10  # Timeout mỗi lần gọi tool
 ```
 
-### ⚠️ Vì sao phải là 5, không phải 3
+### Vì sao phải là 5, không phải 3
 
-Chuỗi demo chính của nhóm cần **4 vòng**: 3 lần gọi tool (`get_learner` → `search_courses` → `check_suitability`) cộng 1 vòng chốt `Final Answer`.
+Chuỗi demo chính của nhóm cần **4 vòng**: 3 lần gọi tool (`get_learner`  `search_courses`  `check_suitability`) cộng 1 vòng chốt `Final Answer`.
 
 Để `MAX_ITERATIONS = 3` thì **demo đẹp nhất của nhóm sẽ chết ở Guardrail** thay vì ra `Final Answer` — mất điểm oan ở cả tiêu chí 2 lẫn tiêu chí 3.
 
@@ -127,12 +127,12 @@ Chốt lại với Role 1: câu bẫy phải cần ≥6 vòng thì Guardrail m�
 
 ---
 
-## 🧪 Cách tự kiểm tra prompt
+## Cách tự kiểm tra prompt
 
 Chưa cần chờ Role 2 và Role 4. Dán prompt vào ChatGPT/Gemini web, thêm 1 câu hỏi, xem LLM có trả đúng định dạng 2 dòng không:
 
-- ✅ Trả `Thought:` + `Action: get_learner[0912345203]` rồi **dừng lại**
-- ❌ Trả cả đoạn văn dài, hoặc **tự bịa luôn `Observation`** → cần siết prompt chặt hơn
+-  Trả `Thought:` + `Action: get_learner[0912345203]` rồi **dừng lại**
+-  Trả cả đoạn văn dài, hoặc **tự bịa luôn `Observation`**  cần siết prompt chặt hơn
 
 Khi Role 4 đã có app chạy, test nhanh bằng:
 
@@ -142,7 +142,7 @@ Khi Role 4 đã có app chạy, test nhanh bằng:
 
 ---
 
-## 🧪 Tự chấm — chạy bất cứ lúc nào
+## Tự chấm — chạy bất cứ lúc nào
 
 ```bash
 .venv\Scripts\python.exe tests\test_role3.py
@@ -157,11 +157,11 @@ Ngoài ra nó kiểm: prompt đủ 4 phần chưa, có ví dụ few-shot kèm `O
 
 Chạy tới khi thấy `COVERAGE: 17/17` là xong phần bạn.
 
-> ℹ️ Mục so khớp tên tool sẽ hiện `[-]` (bỏ qua) cho tới khi Role 2 làm xong `tools.py`. Nhớ chạy lại sau khi Hướng push code.
+> ℹ Mục so khớp tên tool sẽ hiện `[-]` (bỏ qua) cho tới khi Role 2 làm xong `tools.py`. Nhớ chạy lại sau khi Hướng push code.
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 - [ ] Mốc 1: Liệt kê ít nhất 5 Failure Modes
 - [ ] Mốc 2: `CHATBOT_BASELINE_PROMPT` (công bằng, không dìm hàng)
@@ -172,7 +172,7 @@ Chạy tới khi thấy `COVERAGE: 17/17` là xong phần bạn.
 
 ---
 
-## 🔄 Git
+## Git
 
 ```bash
 git checkout role3-prompt-engineer

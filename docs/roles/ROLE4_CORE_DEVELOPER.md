@@ -1,4 +1,4 @@
-# 🚀 ROLE 4 — CORE DEVELOPER / INTEGRATOR
+# ROLE 4 — CORE DEVELOPER / INTEGRATOR
 
 | | |
 | :-- | :-- |
@@ -9,7 +9,7 @@
 
 ---
 
-## ✅ Trạng thái: vòng lặp ReAct đã viết xong
+## Trạng thái: vòng lặp ReAct đã viết xong
 
 `src/app.py` đã có vòng lặp ReAct thật (không còn hardcode như bản boilerplate). Đã test 7 case bằng provider giả lập — parse đúng, xử lý lỗi đúng, guardrail dừng đúng.
 
@@ -27,7 +27,7 @@ Chạy:
 .venv\Scripts\python.exe src\app.py all    # cả 5 test case
 ```
 
-### 🔑 Vì sao đổi đề tài mà không phải sửa `app.py`
+### Vì sao đổi đề tài mà không phải sửa `app.py`
 
 Vòng lặp viết **generic**: nó đọc `AVAILABLE_TOOLS` lúc chạy, tool tên gì cũng gọi được. Nhóm đổi từ "đăng ký môn ở trường" sang "marketplace khóa học bên ngoài", Role 2 đổi toàn bộ tên tool — `app.py` vẫn chạy nguyên si.
 
@@ -35,7 +35,7 @@ Vòng lặp viết **generic**: nó đọc `AVAILABLE_TOOLS` lúc chạy, tool t
 
 ---
 
-## 🎯 Việc còn lại của bạn
+## Việc còn lại của bạn
 
 ### 1. Lấy API key (làm ngay, không cần chờ ai)
 
@@ -53,7 +53,7 @@ GEMINI_API_KEY=<key_cua_ban>
 LLM_MODEL=gemini-2.5-flash
 ```
 
-> 🔒 `.env` đã nằm trong `.gitignore` — **không bao giờ commit key lên GitHub**.
+>  `.env` đã nằm trong `.gitignore` — **không bao giờ commit key lên GitHub**.
 
 ### 2. Đầu mối lắp ráp
 
@@ -73,7 +73,7 @@ Mỗi người giữ 1 file riêng nên hầu như không bao giờ conflict.
 
 | Cần chốt | Với ai | Vì sao |
 | :-- | :-- | :-- |
-| **Tên tool khớp nhau** | Role 2 ↔ Role 3 | Prompt của Liên liệt kê `get_learner` mà registry của Hướng đặt là `get_hoc_vien` → Agent gọi tool không tồn tại |
+| **Tên tool khớp nhau** | Role 2  Role 3 | Prompt của Liên liệt kê `get_learner` mà registry của Hướng đặt là `get_hoc_vien`  Agent gọi tool không tồn tại |
 | **`MAX_ITERATIONS = 5`** | Role 3 | Chuỗi demo chính cần 4 vòng. Để 3 là demo đẹp nhất chết ở guardrail |
 
 ### 4. Mốc 4 — trình chiếu & phản biện
@@ -82,7 +82,7 @@ Bạn là người demo app và chống đỡ câu bẫy từ nhóm khác.
 
 ---
 
-## 🧪 Test nhanh khi code Role 2 và Role 3 về
+## Test nhanh khi code Role 2 và Role 3 về
 
 ```bash
 .venv\Scripts\python.exe src\app.py 3
@@ -97,13 +97,13 @@ Nhìn vào output, kiểm 4 thứ:
 | `Observation:` là dữ liệu thật, không phải LLM bịa | `cut_hallucinated_observation()` hoạt động |
 | Ra `Final Answer` trước khi hết 5 vòng | `MAX_ITERATIONS` đủ rộng |
 
-Nếu thấy `[!] LLM không sinh đúng định dạng Action` → prompt của Role 3 chưa đủ chặt, báo Liên siết lại.
+Nếu thấy `[!] LLM không sinh đúng định dạng Action`  prompt của Role 3 chưa đủ chặt, báo Liên siết lại.
 
-Nếu thấy `LỖI: Không có công cụ nào tên '...'` → tên tool trong prompt lệch với registry, đây là lỗi giao giữa Role 2 và Role 3.
+Nếu thấy `LỖI: Không có công cụ nào tên '...'`  tên tool trong prompt lệch với registry, đây là lỗi giao giữa Role 2 và Role 3.
 
 ---
 
-## 📦 Dữ liệu
+## Dữ liệu
 
 [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa, 5 nhà cung cấp, 6 giảng viên. Chi tiết: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
 
@@ -118,7 +118,7 @@ Hồ sơ để test nhanh:
 
 ---
 
-## 🎁 BONUS +10% — Autonomous Agent (Cấp 4) — ĐÃ LÀM
+## BONUS +10% — Autonomous Agent (Cấp 4) — ĐÃ LÀM
 
 Làm **cả hai** năng lực, đều nằm trong `src/app.py`:
 
@@ -126,7 +126,7 @@ Làm **cả hai** năng lực, đều nằm trong `src/app.py`:
 | :-- | :-- | :-- |
 | **Planning** | `lap_ke_hoach()` | Trước khi vào vòng lặp, hỏi LLM chia mục tiêu thành tối đa 4 bước, rồi chèn kế hoạch vào history |
 | **Memory** | `class BoNho` | Nhớ kết quả tool đã tra. Lượt sau hỏi lại cùng thứ thì lấy từ bộ nhớ, không gọi tool |
-| Demo | `run_autonomous_agent()` | Ghép cả hai, in kế hoạch và đánh dấu 🧠 khi dùng bộ nhớ |
+| Demo | `run_autonomous_agent()` | Ghép cả hai, in kế hoạch và đánh dấu  khi dùng bộ nhớ |
 
 Chạy demo:
 
@@ -148,7 +148,7 @@ Trên giao diện web có nút **Autonomous** ở header, hiện kế hoạch t�
 
 ---
 
-## 🖥️ Giao diện web — dùng để trình chiếu Mốc 4
+## Giao diện web — dùng để trình chiếu Mốc 4
 
 ```bash
 .venv\Scripts\python.exe src\web_ui.py
@@ -159,17 +159,17 @@ Mở `http://localhost:8765`. Hai cột cạnh nhau trên **cùng một câu h�
 | Cột trái | Cột phải |
 |---|---|
 | Chatbot thường (Cấp 2) | ReAct Agent (Cấp 3) |
-| Trả lời chung chung, không tra được gì | Hiện từng vòng: 💭 Thought · 🛠 Action · 👁 Observation · 🏁 Final Answer |
+| Trả lời chung chung, không tra được gì | Hiện từng vòng:  Thought ·  Action ·  Observation ·  Final Answer |
 
 Bấm sẵn được 5 test case của Role 1. Observation lỗi hiện màu đỏ, Guardrail hiện khung vàng.
 
 Dùng `http.server` có sẵn trong Python — **không cài thêm thư viện nào**, `requirements.txt` giữ nguyên.
 
-> 🔑 UI và CLI dùng chung hàm `react_steps()` trong `app.py`, nên logic không bao giờ lệch nhau. Sửa vòng lặp một chỗ là cả hai cùng đổi.
+>  UI và CLI dùng chung hàm `react_steps()` trong `app.py`, nên logic không bao giờ lệch nhau. Sửa vòng lặp một chỗ là cả hai cùng đổi.
 
 ---
 
-## 🧪 Tự chấm & theo dõi cả nhóm
+## Tự chấm & theo dõi cả nhóm
 
 Phần của bạn (29 mục):
 
@@ -198,7 +198,7 @@ Test của bạn kiểm cả một thứ dễ vỡ về sau: `app.py` **không �
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 - [x] Vòng lặp ReAct thật (`parse_action` + `history` + guardrail)
 - [x] Chặn tool không tồn tại, chặn LLM bịa Observation
@@ -208,11 +208,11 @@ Test của bạn kiểm cả một thứ dễ vỡ về sau: `app.py` **không �
 - [ ] `git merge` code cả nhóm, chạy đủ 5 test case
 - [ ] Giao log cho Role 1 (Đạt) làm trace
 - [ ] Mốc 4: chuẩn bị trình chiếu
-- [ ] 🎁 Bonus: Planning hoặc Memory
+- [ ]  Bonus: Planning hoặc Memory
 
 ---
 
-## 🔄 Git
+## Git
 
 ```bash
 git checkout role4-core-developer

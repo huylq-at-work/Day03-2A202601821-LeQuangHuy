@@ -1,4 +1,4 @@
-# 🟢 Role 1: Đánh Giá Agentic Fit & Trace Log
+# Role 1: Đánh Giá Agentic Fit & Trace Log
 
 ## 1. Scoring Matrix (Đánh giá độ phù hợp của Agent)
 
@@ -16,7 +16,7 @@
 > Sinh tự động bằng `scripts/gen_trace_eval.py`, chạy trên `OpenAIProvider` (model `gpt-4o-mini`) với `MAX_ITERATIONS = 6`.
 > Chạy lại script là ra lại toàn bộ log này — không chép tay.
 
-### Test Case 1 — 🟢 Đơn giản (Chỉ cần LLM)
+### Test Case 1 —  Đơn giản (Chỉ cần LLM)
 
 **Câu hỏi**: Học IELTS thì nên bắt đầu từ đâu?
 
@@ -25,21 +25,21 @@
 #### Chatbot baseline (không có tool)
 
 > Khi bắt đầu học IELTS, bạn có thể làm theo những bước sau để xây dựng nền tảng vững chắc:
-> 
+>
 > 1. **Hiểu cấu trúc bài thi**: Tìm hiểu về từng phần của bài thi IELTS (Listening, Reading, Writing, Speaking). Mỗi phần có yêu cầu và format riêng nên việc nắm rõ sẽ giúp bạn có kế hoạch học tập hiệu quả hơn.
-> 
+>
 > 2. **Đánh giá trình độ hiện tại**: Trước khi bắt đầu học, hãy tự kiểm tra trình độ tiếng Anh của mình. Bạn có thể làm một bài kiểm tra mẫu để biết mình đang ở mức nào và điểm mạnh, yếu của bản thân.
-> 
+>
 > 3. **Lên kế hoạch học tập**: Dựa trên mục tiêu của bạn (ví dụ: điểm số mong muốn, thời gian chuẩn bị), hãy lập một kế hoạch học tập cụ thể. Duy trì thói quen học tập hàng ngày sẽ giúp bạn tiến bộ nhanh chóng.
-> 
+>
 > 4. **Tài liệu học tập**: Sử dụng sách giáo trình, tài liệu trực tuyến hoặc các khóa học online dành cho IELTS. Có nhiều nguồn tài liệu chất lượng, giúp bạn rèn luyện cả bốn kỹ năng.
-> 
+>
 > 5. **Thực hành thường xuyên**: Thực hành là cách tốt nhất để cải thiện. Hãy thử làm các bài thi mẫu, luyện nghe qua podcast hoặc video, tham gia các câu lạc bộ tiếng Anh để rèn luyện kỹ năng nói.
-> 
+>
 > 6. **Nhận xét và cải thiện**: Nếu có thể, hãy nhờ người có kinh nghiệm hoặc giáo viên xem xét bài viết và phát âm của bạn. Nhận được phản hồi sẽ giúp bạn tiến bộ hơn.
-> 
+>
 > 7. **Tham gia các lớp học hoặc nhóm học**: Nếu có điều kiện, hãy tham gia các khóa học IELTS hoặc nhóm học để có sự hướng dẫn từ giảng viên và trao đổi với bạn bè.
-> 
+>
 > Hãy nhớ rằng sự kiên nhẫn và kiên trì là yếu tố quan trọng trong việc học tiếng Anh và đạt được kết quả tốt trong kỳ thi IELTS! Chúc bạn học tập hiệu quả!
 
 #### ReAct Agent
@@ -59,7 +59,7 @@ Final Answer: Hiện tại không có khóa học IELTS nào dưới 2.000.000đ
 
 ---
 
-### Test Case 2 — 🟢 Đơn giản (Chỉ cần LLM)
+### Test Case 2 —  Đơn giản (Chỉ cần LLM)
 
 **Câu hỏi**: Làm sao để tập trung khi học code tại nhà?
 
@@ -68,21 +68,21 @@ Final Answer: Hiện tại không có khóa học IELTS nào dưới 2.000.000đ
 #### Chatbot baseline (không có tool)
 
 > Để tập trung khi học code tại nhà, bạn có thể thử áp dụng một số mẹo sau:
-> 
+>
 > 1. **Thiết lập không gian học tập**: Tạo một không gian học tập riêng biệt, gọn gàng và thoải mái. Đảm bảo nơi đó yên tĩnh và ít bị phân tâm.
-> 
+>
 > 2. **Lên lịch học**: Đặt lịch học cụ thể mỗi ngày. Thời gian này nên được duy trì như một thói quen để giúp bạn vào guồng nhanh chóng.
-> 
+>
 > 3. **Sử dụng kỹ thuật Pomodoro**: Thử học trong khoảng 25 phút và nghỉ 5 phút. Sau bốn chu kỳ, hãy nghỉ dài hơn. Kỹ thuật này giúp duy trì sự tập trung mà không cảm thấy quá mệt mỏi.
-> 
+>
 > 4. **Giảm thiểu yếu tố phân tâm**: Tắt thông báo trên điện thoại, đóng các tab không cần thiết trên trình duyệt và giữ cho môi trường học tập tránh xa những yếu tố có thể gây sao nhãng.
-> 
+>
 > 5. **Đặt mục tiêu học tập**: Xác định rõ mục tiêu cần đạt được trong mỗi buổi học. Điều này sẽ giúp bạn dễ dàng hơn trong việc tập trung vào những gì cần làm.
-> 
+>
 > 6. **Thay đổi phương pháp học**: Nếu bạn cảm thấy chán nản, thử đổi mới cách học như xem video, tham gia các diễn đàn hoặc làm bài tập thực hành.
-> 
+>
 > 7. **Tự thưởng cho bản thân**: Sau khi hoàn thành một mục tiêu học tập, hãy tự thưởng cho mình một thứ gì đó nhỏ để tạo động lực.
-> 
+>
 > Hy vọng những mẹo này giúp bạn có thể tập trung hơn khi học code tại nhà! Chúc bạn học tập hiệu quả!
 
 #### ReAct Agent
@@ -96,26 +96,26 @@ Final Answer: Mình chỉ hỗ trợ tìm và đăng ký khóa học thôi ạ. 
 
 ---
 
-### Test Case 3 — 🟡 Multi-step (Tool sau phụ thuộc tool trước)
+### Test Case 3 —  Multi-step (Tool sau phụ thuộc tool trước)
 
 **Câu hỏi**: Em là 0912345203, em muốn học AI thì nên đăng ký khóa nào?
 
-**Kỳ vọng**: get_learner(0912345203) → biết ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối → search_courses(AI, 2000000) → check_suitability → gợi ý khóa học phù hợp (như AI302).
+**Kỳ vọng**: get_learner(0912345203)  biết ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối  search_courses(AI, 2000000)  check_suitability  gợi ý khóa học phù hợp (như AI302).
 
 #### Chatbot baseline (không có tool)
 
 > Chào bạn! Học trí tuệ nhân tạo (AI) là một lĩnh vực rất thú vị và có nhiều cơ hội nghề nghiệp. Tuy nhiên, mình không thể cung cấp thông tin cụ thể về các khóa học.
-> 
+>
 > Mình khuyên bạn nên tìm hiểu về các khóa học liên quan đến những chủ đề như:
-> 
+>
 > 1. **Cơ bản về AI và Machine Learning**: Nên tìm khóa học phù hợp cho người mới bắt đầu để nắm được các khái niệm cơ bản.
-> 
+>
 > 2. **Deep Learning**: Khi bạn đã nắm chắc kiến thức cơ bản, có thể tìm các khóa học chuyên sâu hơn về mạng nơ-ron và Deep Learning.
-> 
+>
 > 3. **Xử lý hình ảnh và video**: Nếu bạn hứng thú với việc làm việc với hình ảnh, tìm các khóa học liên quan đến computer vision.
-> 
+>
 > 4. **Xử lý ngôn ngữ tự nhiên (NLP)**: Nếu bạn quan tâm đến việc hiểu và phân tích ngôn ngữ, các khóa học về NLP cũng rất hữu ích.
-> 
+>
 > Bạn nên tìm khóa học từ các nền tảng uy tín và xem xét các đánh giá để chọn lựa đúng cho bản thân. Chúc bạn tìm được khóa học phù hợp và học tập hiệu quả!
 
 #### ReAct Agent
@@ -147,7 +147,7 @@ Final Answer: Với mục tiêu học AI, trình độ mới bắt đầu và ng
 
 ---
 
-### Test Case 4 — 🟡 Multi-step (Kiểm tra điều kiện)
+### Test Case 4 —  Multi-step (Kiểm tra điều kiện)
 
 **Câu hỏi**: Em là 0987654387, em đăng ký khóa EN101 được không?
 
@@ -155,8 +155,8 @@ Final Answer: Với mục tiêu học AI, trình độ mới bắt đầu và ng
 
 #### Chatbot baseline (không có tool)
 
-> Chào bạn! Rất vui khi bạn quan tâm đến khóa học EN101. Tuy nhiên, mình không có khả năng truy cập thông tin về tình trạng đăng ký hoặc các khóa học cụ thể. 
-> 
+> Chào bạn! Rất vui khi bạn quan tâm đến khóa học EN101. Tuy nhiên, mình không có khả năng truy cập thông tin về tình trạng đăng ký hoặc các khóa học cụ thể.
+>
 > Mình khuyên bạn nên kiểm tra trên trang web của trung tâm hoặc liên hệ với bộ phận hỗ trợ để biết rõ hơn về tình trạng đăng ký cũng như thông tin chi tiết về khóa học. Nếu cần, mình có thể giúp bạn với những thông tin chung về khóa học online. Bạn có cần thêm thông tin gì không?
 
 #### ReAct Agent
@@ -176,7 +176,7 @@ Final Answer: Bạn chưa nên đăng ký khóa EN101 vì lịch học T2/T4 t�
 
 ---
 
-### Test Case 5 — 🔴 Edge Case (Bẫy Guardrail)
+### Test Case 5 —  Edge Case (Bẫy Guardrail)
 
 **Câu hỏi**: Em là 0000000000, đăng ký giúp em khóa Thôi Miên Nâng Cao mã XYZ999 ạ.
 
@@ -237,11 +237,11 @@ Digital Marketing, quản lý dự án, phân tích dữ liệu và ngoại ng�
 
 ```text
 User prompt
-    ↓
+
 provider.generate()
-    ↓
+
 LLM trả lời trực tiếp bằng kiến thức có sẵn
-    ↓
+
 Không gọi tool, không truy vấn mock database
 ```
 
@@ -284,19 +284,19 @@ Luồng tool tương ứng dự kiến:
 
 ```text
 Agent thu thập đủ bảy trường
-    ↓
+
 Action: dang_ky_hoc_vien[...]
-    ↓
+
 Observation: hồ sơ được tạo hoặc thông báo dữ liệu còn thiếu
-    ↓
+
 Action: search_courses[vật lý, 100000000]
-    ↓
+
 Observation: danh sách khóa Vật Lý
-    ↓
+
 Action: check_suitability[0283736282, PH101]
-    ↓
+
 Observation: Phù hợp.
-    ↓
+
 Final Answer: gợi ý PH101 kèm lý do
 ```
 

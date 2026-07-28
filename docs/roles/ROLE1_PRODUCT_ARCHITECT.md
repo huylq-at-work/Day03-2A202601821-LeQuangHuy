@@ -1,4 +1,4 @@
-# 🟢 ROLE 1 — PRODUCT ARCHITECT & OBSERVABILITY
+# ROLE 1 — PRODUCT ARCHITECT & OBSERVABILITY
 
 | | |
 | :-- | :-- |
@@ -7,11 +7,11 @@
 | **File giữ** | `config/test_cases.json` + `docs/trace_eval.md` |
 | **Trọng số điểm** | 20% (Agentic Fit & Test Design) + 10% (Hybrid Flowchart) |
 
-> ℹ️ Vai này gộp Role 1 + Role 5 (nhóm 4 người / 5 vai). Người viết test case hiểu rõ nhất câu nào là bẫy nên soi trace log chính xác nhất.
+> ℹ Vai này gộp Role 1 + Role 5 (nhóm 4 người / 5 vai). Người viết test case hiểu rõ nhất câu nào là bẫy nên soi trace log chính xác nhất.
 
 ---
 
-## 🎯 Đề tài nhóm
+## Đề tài nhóm
 
 **Trợ Lý Đăng Ký Khóa Học — marketplace khóa học bên ngoài.**
 
@@ -19,11 +19,11 @@ Có cả khóa **online tự học** lẫn **lớp offline tại trung tâm**, n
 
 Không phải hệ thống đăng ký môn của trường — không có `mssv`, `ngành`, `môn tiên quyết`. Trục suy luận là **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
 
-📦 Dữ liệu: [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa. Chi tiết: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
+ Dữ liệu: [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa. Chi tiết: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
 
 ---
 
-## 📍 MỐC 1 (20 phút) — Scoring Matrix
+## MỐC 1 (20 phút) — Scoring Matrix
 
 Mở `docs/trace_eval.md`, chấm 1–5 điểm cho 4 tiêu chí Agentic Fit:
 
@@ -38,15 +38,15 @@ Mở `docs/trace_eval.md`, chấm 1–5 điểm cho 4 tiêu chí Agentic Fit:
 
 ---
 
-## 📍 MỐC 2 (30 phút) — Viết 5 Test Cases
+## MỐC 2 (30 phút) — Viết 5 Test Cases
 
 Mở `config/test_cases.json`. Cần đủ 3 nhóm:
 
 | Loại | Số câu | Mục đích |
 | :-- | :-: | :-- |
-| 🟢 Đơn giản | 2 | Chatbot trả lời được → không phải lúc nào cũng cần Agent |
-| 🟡 Multi-step | 2 | Bắt buộc gọi tool, tool sau phụ thuộc tool trước |
-| 🔴 Edge case | 1 | Dữ liệu không tồn tại → xem Agent có **bịa** không |
+| Đơn giản | 2 | Chatbot trả lời được  không phải lúc nào cũng cần Agent |
+| Multi-step | 2 | Bắt buộc gọi tool, tool sau phụ thuộc tool trước |
+| Edge case | 1 | Dữ liệu không tồn tại  xem Agent có **bịa** không |
 
 ### Mẫu
 
@@ -54,25 +54,25 @@ Mở `config/test_cases.json`. Cần đủ 3 nhóm:
 [
   {
     "id": 1,
-    "category": "🟢 Đơn giản (Chỉ cần LLM)",
+    "category": " Đơn giản (Chỉ cần LLM)",
     "question": "Học IELTS thì nên bắt đầu từ đâu?",
     "expected_behavior": "Chatbot trả lời từ kiến thức có sẵn, không cần tool."
   },
   {
     "id": 3,
-    "category": "🟡 Multi-step (Tool sau phụ thuộc tool trước)",
+    "category": " Multi-step (Tool sau phụ thuộc tool trước)",
     "question": "Em là 0912345203, em muốn học AI thì nên đăng ký khóa nào?",
-    "expected_behavior": "get_learner(0912345203) → biết ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối → search_courses(AI, 2000000) → check_suitability → gợi ý AI302."
+    "expected_behavior": "get_learner(0912345203)  biết ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối  search_courses(AI, 2000000)  check_suitability  gợi ý AI302."
   },
   {
     "id": 4,
-    "category": "🟡 Multi-step (Kiểm tra điều kiện)",
+    "category": " Multi-step (Kiểm tra điều kiện)",
     "question": "Em là 0987654387, em đăng ký khóa EN101 được không?",
     "expected_behavior": "Agent phải chỉ ra ĐÚNG 1 lý do trượt: lịch T2/T4 tối không khớp khung rảnh T3/T5 tối."
   },
   {
     "id": 5,
-    "category": "🔴 Edge Case (Bẫy Guardrail)",
+    "category": " Edge Case (Bẫy Guardrail)",
     "question": "Em là 0000000000, đăng ký giúp em khóa Thôi Miên Nâng Cao ạ.",
     "expected_behavior": "Cả 2 tool trả LỖI. Agent KHÔNG được bịa hồ sơ hay bịa khóa học. Guardrail ngắt sau MAX_ITERATIONS bước, trả lời lịch sự."
   }
@@ -81,7 +81,7 @@ Mở `config/test_cases.json`. Cần đủ 3 nhóm:
 
 ---
 
-## 🎣 Bẫy có sẵn trong dữ liệu — đã kiểm chứng
+## Bẫy có sẵn trong dữ liệu — đã kiểm chứng
 
 Dùng bảng này để viết test case, khỏi phải tự dò:
 
@@ -95,13 +95,13 @@ Dùng bảng này để viết test case, khỏi phải tự dò:
 | `0987654387` Đạt | `EN201` | **3 lỗi**: ngân sách, trình độ, **lớp đã đầy** 20/20 |
 | `0901234795` Liên | `EN301` | **1 lỗi**: **hết hạn đăng ký** 2026-07-15 |
 
-> 💎 Ba mức **3 lỗi / 1 lỗi / phù hợp** là chỗ đắt nhất — cùng câu hỏi, đổi số điện thoại là ra kết quả khác hẳn. Đây là bằng chứng mạnh nhất rằng Agent tra dữ liệu thật.
+>  Ba mức **3 lỗi / 1 lỗi / phù hợp** là chỗ đắt nhất — cùng câu hỏi, đổi số điện thoại là ra kết quả khác hẳn. Đây là bằng chứng mạnh nhất rằng Agent tra dữ liệu thật.
 
 Bẫy dành riêng cho câu edge case: SĐT `0000000000` và mã khóa `XYZ999` đều không tồn tại.
 
 ---
 
-## 📍 MỐC 3 (60 phút) — Soi Trace Log
+## MỐC 3 (60 phút) — Soi Trace Log
 
 Sau khi Huy chạy được Agent, chạy đủ 5 test case rồi dán log vào `docs/trace_eval.md`:
 
@@ -120,7 +120,7 @@ Thought: Đã rõ nguyên nhân, trả lời học viên.
 Final Answer: Khóa EN101 hợp túi tiền và trình độ của bạn, nhưng học T2/T4 tối
               mà bạn chỉ rảnh T3/T5 tối...
 
-**Nhận xét**: ✅ Gọi đúng 2 tool theo thứ tự, chỉ ra đúng 1 lý do trượt, không bịa.
+**Nhận xét**:  Gọi đúng 2 tool theo thứ tự, chỉ ra đúng 1 lý do trượt, không bịa.
 ```
 
 Cần **ít nhất 1 trace hoàn chỉnh** để lấy điểm tiêu chí 3.
@@ -129,7 +129,7 @@ Cần **ít nhất 1 trace hoàn chỉnh** để lấy điểm tiêu chí 3.
 
 ---
 
-## 📍 MỐC 4 (40 phút) — Hybrid Flowchart
+## MỐC 4 (40 phút) — Hybrid Flowchart
 
 Tạo `docs/hybrid_flowchart.mermaid`:
 
@@ -138,16 +138,16 @@ flowchart TD
     A[Câu hỏi của học viên] --> B{Có cần hồ sơ cá nhân<br/>hay dữ liệu khóa học?}
     B -- Không --> C[Chatbot Path<br/>LLM trả lời trực tiếp]
     B -- Có --> D[ReAct Agent Path]
-    D --> E[Thought → Action → Observation]
+    D --> E[Thought  Action  Observation]
     E --> F{Đã đủ thông tin?}
     F -- Chưa --> E
     F -- Rồi --> G[Final Answer]
-    E -.-> H[🛡️ MAX_ITERATIONS<br/>ngắt lặp vô tận]
+    E -.-> H[ MAX_ITERATIONS<br/>ngắt lặp vô tận]
 ```
 
 ---
 
-## 🧪 Tự chấm — chạy bất cứ lúc nào
+## Tự chấm — chạy bất cứ lúc nào
 
 ```bash
 .venv\Scripts\python.exe tests\test_role1.py
@@ -165,7 +165,7 @@ Chạy tới khi thấy `COVERAGE: 20/20` là xong phần bạn.
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 - [ ] Mốc 1: Scoring Matrix 4 tiêu chí
 - [ ] Mốc 2: 5 test case (2 dễ / 2 multi-step / 1 bẫy)
@@ -176,7 +176,7 @@ Chạy tới khi thấy `COVERAGE: 20/20` là xong phần bạn.
 
 ---
 
-## 🔄 Git
+## Git
 
 ```bash
 git checkout role1-product-architect

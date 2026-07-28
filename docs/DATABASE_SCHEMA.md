@@ -1,13 +1,13 @@
-# 🗄️ MOCK DATABASE SCHEMA — Trợ Lý Đăng Ký Khóa Học (Marketplace)
+# MOCK DATABASE SCHEMA — Trợ Lý Đăng Ký Khóa Học (Marketplace)
 
 > Bản thiết kế cho **Role 2 (Tool Engineer)**.
-> 📦 Dữ liệu thật: **[`config/mock_database.json`](../config/mock_database.json)** — file này giải thích cấu trúc.
+>  Dữ liệu thật: **[`config/mock_database.json`](../config/mock_database.json)** — file này giải thích cấu trúc.
 
 **Bối cảnh**: marketplace khóa học bên ngoài — có cả khóa **online tự học** lẫn **lớp offline tại trung tâm**, nhiều nhà cung cấp. Học viên định danh bằng **số điện thoại**.
 
 **Quy mô**: 1000 học viên · 13 khóa học · 5 nhà cung cấp · 6 giảng viên (~268 KB).
 
-> ⚠️ Đây **không phải** hệ thống đăng ký môn của trường. Không có `mssv`, `ngành`, `kỳ học`, `môn tiên quyết`. Trục suy luận là **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
+>  Đây **không phải** hệ thống đăng ký môn của trường. Không có `mssv`, `ngành`, `kỳ học`, `môn tiên quyết`. Trục suy luận là **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
 
 ---
 
@@ -29,7 +29,7 @@ CAP_DO = _DB["_meta"]["cap_do"]                    # thứ tự trình độ, d�
 NGAY_HIEN_TAI = _DB["_meta"]["ngay_hien_tai"]      # "2026-07-28"
 ```
 
-> 🔒 Dùng `NGAY_HIEN_TAI` từ file, **đừng dùng `datetime.now()`**. Ngày cố định thì test case của Role 1 chạy lúc nào cũng ra kết quả giống nhau — bẫy "hết hạn đăng ký" mới tái lập được.
+>  Dùng `NGAY_HIEN_TAI` từ file, **đừng dùng `datetime.now()`**. Ngày cố định thì test case của Role 1 chạy lúc nào cũng ra kết quả giống nhau — bẫy "hết hạn đăng ký" mới tái lập được.
 
 ---
 
@@ -74,7 +74,7 @@ learners                      courses                     providers
 | :-- | :-- | :-- |
 | *(khóa)* | string | `EN101`, `PR201`, … |
 | `ten` | string | |
-| `ma_ncc` | string | **khóa ngoại** → `providers` |
+| `ma_ncc` | string | **khóa ngoại**  `providers` |
 | `chu_de` | array\<string\> | **nối** với `learners.muc_tieu` |
 | `trinh_do_yeu_cau` | string | trình độ đầu vào tối thiểu |
 | `hinh_thuc` | string | `online` / `offline` |
@@ -87,15 +87,15 @@ learners                      courses                     providers
 | `da_dang_ky` | int | |
 | `rating` | float | thang 5.0 |
 | `chung_chi` | bool | có cấp chứng chỉ không |
-| `ma_gv` | string | **khóa ngoại** → `instructors` |
+| `ma_gv` | string | **khóa ngoại**  `instructors` |
 
 ### Ba đường nối quan trọng nhất
 
 | Nối | Cho phép chuỗi suy luận |
 | :-- | :-- |
-| `learners.muc_tieu` ↔ `courses.chu_de` | Biết mục tiêu → lọc ra khóa phù hợp |
-| `learners.ngan_sach` + `lich_ranh` + `trinh_do` + `khu_vuc` ↔ `courses.*` | Lọc 5 chiều → tìm khóa khả thi |
-| `courses.ma_ncc` → `providers` | Biết khóa → tra uy tín trung tâm |
+| `learners.muc_tieu`  `courses.chu_de` | Biết mục tiêu  lọc ra khóa phù hợp |
+| `learners.ngan_sach` + `lich_ranh` + `trinh_do` + `khu_vuc`  `courses.*` | Lọc 5 chiều  tìm khóa khả thi |
+| `courses.ma_ncc`  `providers` | Biết khóa  tra uy tín trung tâm |
 
 ---
 
@@ -109,7 +109,7 @@ learners                      courses                     providers
 | 12:00 – 17:59 | chiều |
 | ≥ 18:00 | tối |
 
-Ví dụ: `"T2 19:00-21:00"` → `"T2 tối"`. Khóa khớp lịch khi **mọi buổi học** đều nằm trong `lich_ranh`.
+Ví dụ: `"T2 19:00-21:00"`  `"T2 tối"`. Khóa khớp lịch khi **mọi buổi học** đều nằm trong `lich_ranh`.
 
 ---
 
@@ -131,12 +131,12 @@ Bẫy khác trong dữ liệu:
 
 | Bẫy | Ở đâu |
 | :-- | :-- |
-| SĐT không tồn tại | `0000000000` → phải trả `LỖI:`, **không được bịa hồ sơ** |
-| Mã khóa không tồn tại | `XYZ999` → phải trả `LỖI:` |
+| SĐT không tồn tại | `0000000000`  phải trả `LỖI:`, **không được bịa hồ sơ** |
+| Mã khóa không tồn tại | `XYZ999`  phải trả `LỖI:` |
 | `si_so = null` | Mọi khóa online — code không được crash khi so sánh với `None` |
-| Khóa online không có lịch | `lich_hoc = []` → không được báo "lịch không khớp" |
+| Khóa online không có lịch | `lich_hoc = []`  không được báo "lịch không khớp" |
 
-> 💎 Ba mức **3 lỗi / 1 lỗi / phù hợp** là chỗ đắt nhất: cùng một câu hỏi, đổi SĐT là ra kết quả khác hẳn — chứng minh Agent thật sự tra dữ liệu chứ không đọc thuộc lòng.
+>  Ba mức **3 lỗi / 1 lỗi / phù hợp** là chỗ đắt nhất: cùng một câu hỏi, đổi SĐT là ra kết quả khác hẳn — chứng minh Agent thật sự tra dữ liệu chứ không đọc thuộc lòng.
 
 ---
 
@@ -156,11 +156,11 @@ Bẫy khác trong dữ liệu:
 Kiểm đủ 5 chiều và **trả về lý do cụ thể**, không trả `True/False`:
 
 ```
-ngân sách  → gia <= ngan_sach
-trình độ   → cap_do.index(trinh_do) >= cap_do.index(trinh_do_yeu_cau)
-lịch       → mọi buổi trong lich_hoc phải thuộc lich_ranh     (bỏ qua nếu online)
-khu vực    → dia_diem == khu_vuc                              (bỏ qua nếu online)
-chỗ + hạn  → da_dang_ky < si_so, và han_dang_ky >= NGAY_HIEN_TAI  (bỏ qua nếu online)
+ngân sách   gia <= ngan_sach
+trình độ    cap_do.index(trinh_do) >= cap_do.index(trinh_do_yeu_cau)
+lịch        mọi buổi trong lich_hoc phải thuộc lich_ranh     (bỏ qua nếu online)
+khu vực     dia_diem == khu_vuc                              (bỏ qua nếu online)
+chỗ + hạn   da_dang_ky < si_so, và han_dang_ky >= NGAY_HIEN_TAI  (bỏ qua nếu online)
 ```
 
 Trả về nên có dạng:
@@ -176,23 +176,23 @@ Có lý do cụ thể thì Agent mới giải thích được cho người dùng
 **Chuỗi A — 3 hop, dùng trình chiếu chính:**
 
 > "Em là 0912345203, em muốn học AI thì nên đăng ký khóa nào?"
-> `get_learner[0912345203]` → mục tiêu AI, ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối
-> `search_courses[AI, 2000000]` → AI302 (1.5tr, online, mới bắt đầu)
-> `check_suitability[0912345203, AI302]` → phù hợp
+> `get_learner[0912345203]`  mục tiêu AI, ngân sách 2tr, mới bắt đầu, rảnh T2/T4 tối
+> `search_courses[AI, 2000000]`  AI302 (1.5tr, online, mới bắt đầu)
+> `check_suitability[0912345203, AI302]`  phù hợp
 > **Final Answer**: gợi ý AI302, giải thích vì sao AI301 không hợp
 
 **Chuỗi B — 2 hop, so sánh:**
 
 > "So sánh giúp em khóa PR201 và PR202"
-> `compare_courses[PR201, PR202]` → 12tr offline 48 buổi vs 2.5tr online 20 giờ
-> `get_provider[TT02]` → CodeCamp Academy, 4.7
+> `compare_courses[PR201, PR202]`  12tr offline 48 buổi vs 2.5tr online 20 giờ
+> `get_provider[TT02]`  CodeCamp Academy, 4.7
 > **Final Answer**: tùy ngân sách và hình thức mong muốn
 
 **Chuỗi C — câu bẫy, phải chạm Guardrail:**
 
 > "Em là 0000000000, đăng ký giúp em khóa Thôi Miên Nâng Cao"
-> `get_learner[0000000000]` → `LỖI: Không tìm thấy học viên`
-> `search_courses[Thôi Miên Nâng Cao]` → `LỖI: Không tìm thấy khóa`
+> `get_learner[0000000000]`  `LỖI: Không tìm thấy học viên`
+> `search_courses[Thôi Miên Nâng Cao]`  `LỖI: Không tìm thấy khóa`
 > **Final Answer**: xin lỗi lịch sự, **tuyệt đối không bịa dữ liệu**
 
 ---
@@ -207,8 +207,8 @@ Có lý do cụ thể thì Agent mới giải thích được cho người dùng
 
 ---
 
-## ⚠️ 8. Việc phải chốt với Role 3
+## 8. Việc phải chốt với Role 3
 
-Chuỗi A cần **4 vòng lặp** (3 lần gọi tool + 1 lần chốt Final Answer), nhưng `MAX_ITERATIONS` đang để **3** trong `src/prompts.py` → demo đẹp nhất sẽ chết ở Guardrail thay vì ra Final Answer.
+Chuỗi A cần **4 vòng lặp** (3 lần gọi tool + 1 lần chốt Final Answer), nhưng `MAX_ITERATIONS` đang để **3** trong `src/prompts.py`  demo đẹp nhất sẽ chết ở Guardrail thay vì ra Final Answer.
 
-👉 Role 3 nâng `MAX_ITERATIONS = 5`, Role 1 thiết kế câu bẫy cần ≥6 vòng để Guardrail vẫn có đất diễn.
+ Role 3 nâng `MAX_ITERATIONS = 5`, Role 1 thiết kế câu bẫy cần ≥6 vòng để Guardrail vẫn có đất diễn.

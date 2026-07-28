@@ -37,7 +37,7 @@ class Check:
         self.tong = 0
         self.can_sua = []
         print("=" * 64)
-        print(f"  {tieu_de}")
+        print(f"{tieu_de}")
         print("=" * 64)
 
     def muc(self, ten):
@@ -48,9 +48,9 @@ class Check:
         self.tong += 1
         if dieu_kien:
             self.dat += 1
-            print(f"  [x] {ten}")
+            print(f"[x] {ten}")
             return True
-        print(f"  [ ] {ten}")
+        print(f"[ ] {ten}")
         self.can_sua.append(goi_y or ten)
         return False
 
@@ -60,25 +60,25 @@ class Check:
         try:
             kq = ham()
         except Exception as e:
-            print(f"  [ ] {ten}  -> CRASH: {type(e).__name__}: {e}")
+            print(f"[ ] {ten}  -> CRASH: {type(e).__name__}: {e}")
             self.can_sua.append(goi_y or f"{ten} bị crash: {type(e).__name__}")
             return None
         self.dat += 1
-        print(f"  [x] {ten}")
+        print(f"[x] {ten}")
         return kq
 
     def bo_qua(self, ten, ly_do):
-        print(f"  [-] {ten}  ({ly_do})")
+        print(f"[-] {ten}  ({ly_do})")
 
     def ket(self):
         pct = round(self.dat / self.tong * 100) if self.tong else 0
         print()
         print("-" * 64)
-        print(f"  COVERAGE: {self.dat}/{self.tong} ({pct}%)")
+        print(f"COVERAGE: {self.dat}/{self.tong} ({pct}%)")
         if self.can_sua:
             print(f"\n  CÒN PHẢI SỬA ({len(self.can_sua)}):")
             for i, x in enumerate(self.can_sua, 1):
-                print(f"    {i}. {x}")
+                print(f"{i}. {x}")
         else:
             print("\n  Tất cả đạt. Xong phần của bạn!")
         print("-" * 64)

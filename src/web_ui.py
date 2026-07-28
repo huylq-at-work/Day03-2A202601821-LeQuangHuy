@@ -6,7 +6,7 @@ bấm vào mới mở ra xem — giống cách ChatGPT hiện phần thinking.
 
 Dùng http.server có sẵn trong Python, không cần cài thêm thư viện nào.
 
-Chạy:  .venv\\Scripts\\python.exe src\\web_ui.py
+Chạy:.venv\\Scripts\\python.exe src\\web_ui.py
 Mở:    http://localhost:8765
 """
 
@@ -94,7 +94,8 @@ details.trace[open]>summary .chev{transform:rotate(90deg)}
 .step{border-left:2px solid var(--line);padding:11px 0 3px 13px;margin-left:3px}
 .vg{font-size:10.5px;color:var(--mu);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
 .row{display:flex;gap:8px;margin-bottom:6px;font-size:13.5px;align-items:flex-start}
-.ico{flex:0 0 16px;text-align:center;opacity:.8;line-height:1.5}
+.ico{flex:0 0 62px;text-align:right;font-size:11px;color:var(--mu);
+     line-height:1.75;letter-spacing:.03em;text-transform:uppercase}
 .th{color:var(--mu);font-style:italic}
 .act{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--tl);
      background:color-mix(in srgb,var(--tl) 10%,transparent);padding:4px 8px;border-radius:6px;
@@ -130,7 +131,7 @@ footer{border-top:1px solid var(--line);background:var(--bg);padding:13px 18px 1
   <span class="spacer"></span>
   <span class="badge" id="bd-prov"></span>
   <button class="badge" id="clear" style="cursor:pointer;background:none;font:inherit">Xóa hội thoại</button>
-  <button class="icobtn" id="theme" title="Đổi giao diện sáng/tối">🌙</button>
+  <button class="badge" id="theme" style="cursor:pointer;background:none;font:inherit"></button>
 </header>
 <script>
 (function(){
@@ -144,7 +145,7 @@ footer{border-top:1px solid var(--line);background:var(--bg);padding:13px 18px 1
 <footer>
   <div class="composer">
     <textarea id="q" rows="1" placeholder="Nhắn gì đó cho trợ lý…"></textarea>
-    <button class="send" id="go">↑</button>
+    <button class="send" id="go"></button>
   </div>
   <div class="hint" id="hint"></div>
 </footer>
@@ -163,7 +164,7 @@ fetch("/api/info").then(r=>r.json()).then(d=>{
     "Máy trạng thái mô phỏng, không phải LLM thật. Điền API key vào .env để dùng LLM thật."; }
   $("hint").textContent = d.mock
     ? "Đang chạy MockProvider — suy luận được lập trình sẵn, không phải LLM thật."
-    : `${d.tools.length} công cụ · tối đa ${d.max_iterations} vòng lặp`;
+: `${d.tools.length} công cụ · tối đa ${d.max_iterations} vòng lặp`;
   render();
 });
 
@@ -180,23 +181,23 @@ function veTrace(steps, ke_hoach){
   if(guard) nhan += " · chạm Guardrail";
 
   const kh = (ke_hoach && ke_hoach.length)
-    ? `<div class="step"><div class="vg">📋 Kế hoạch tự vạch</div>` +
-      ke_hoach.map((b,i)=>`<div class="row"><span class="ico">${i+1}</span><span class="th">${esc(b)}</span></div>`).join("") +
+    ? `<div class="step"><div class="vg">Kế hoạch tự vạch</div>` +
+      ke_hoach.map((b,i)=>`<div class="row"><span class="ico">bước ${i+1}</span><span class="th">${esc(b)}</span></div>`).join("") +
       `</div>` : "";
 
   const body = kh + steps.map(b=>{
     if(b.loai==="guardrail")
       return `<div class="note"><b>Guardrail ngắt vòng lặp</b><br>Đã chạm giới hạn ${b.vong} vòng mà chưa ra kết quả.</div>`;
     let h = `<div class="step"><div class="vg">Vòng ${b.vong}</div>`;
-    if(b.thought) h += `<div class="row"><span class="ico">💭</span><span class="th">${esc(b.thought)}</span></div>`;
+    if(b.thought) h += `<div class="row"><span class="ico">suy luận</span><span class="th">${esc(b.thought)}</span></div>`;
     if(b.loai==="tool"){
-      h += `<div class="row"><span class="ico">🛠</span><span class="act">${esc(b.tool)}[${esc((b.args||[]).join(", "))}]</span></div>`;
-      const nho = b.tu_bo_nho ? ` <b>🧠 lấy từ bộ nhớ, không gọi tool</b>` : "";
-    h += `<div class="row"><span class="ico">👁</span><span class="obs ${b.loi?"bad":""}">${esc(b.observation)}${nho}</span></div>`;
+      h += `<div class="row"><span class="ico">gọi tool</span><span class="act">${esc(b.tool)}[${esc((b.args||[]).join(", "))}]</span></div>`;
+      const nho = b.tu_bo_nho ? ` <b>[lấy từ bộ nhớ, không gọi tool]</b>` : "";
+    h += `<div class="row"><span class="ico">kết quả</span><span class="obs ${b.loi?"bad":""}">${esc(b.observation)}${nho}</span></div>`;
     }
     if(b.loai==="sai_dinh_dang")
       h += `<div class="note"><b>LLM trả sai định dạng</b><br>Không bóc được Action nên dừng an toàn.</div>`;
-    if(b.loai==="final") h += `<div class="row"><span class="ico">🏁</span><span class="th">Chốt câu trả lời</span></div>`;
+    if(b.loai==="final") h += `<div class="row"><span class="ico">trả lời</span><span class="th">Chốt câu trả lời</span></div>`;
     return h+`</div>`;
   }).join("");
 
@@ -260,7 +261,7 @@ $("clear").onclick = ()=>{ msgs=[]; render(); fetch("/api/reset",{method:"POST"}
 function apDungTheme(t){
   document.documentElement.setAttribute("data-theme", t);
   localStorage.setItem("theme", t);
-  $("theme").textContent = t === "dark" ? "☀️" : "🌙";
+  $("theme").textContent = t === "dark" ? "Giao diện sáng" : "Giao diện tối";
 }
 apDungTheme(localStorage.getItem("theme") || "light");
 $("theme").onclick = ()=>
@@ -347,16 +348,16 @@ class Handler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     ten = provider.__class__.__name__
     print("=" * 58)
-    print("  TRỢ LÝ ĐĂNG KÝ KHÓA HỌC — GIAO DIỆN CHAT")
+    print("TRỢ LÝ ĐĂNG KÝ KHÓA HỌC — GIAO DIỆN CHAT")
     print("=" * 58)
-    print(f"  LLM Provider : {ten}")
-    print(f"  Tools        : {', '.join(AVAILABLE_TOOLS)}")
-    print(f"  Max vòng lặp : {MAX_ITERATIONS}")
+    print(f"LLM Provider : {ten}")
+    print(f"Tools: {', '.join(AVAILABLE_TOOLS)}")
+    print(f"Max vòng lặp : {MAX_ITERATIONS}")
     if ten == "MockProvider":
         print("\n  [!] MockProvider là máy trạng thái mô phỏng, KHÔNG phải LLM thật.")
-        print("      Điền API key vào .env để chạy bằng LLM thật.")
+        print("Điền API key vào .env để chạy bằng LLM thật.")
     print(f"\n  Mở trình duyệt: http://localhost:{PORT}")
-    print("  Dừng: Ctrl+C")
+    print("Dừng: Ctrl+C")
     print("=" * 58)
     try:
         HTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

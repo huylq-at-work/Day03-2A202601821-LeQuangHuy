@@ -3,7 +3,7 @@ TEST ROLE 3 — Phạm Thị Liên (Prompt & Safeguard Engineer)
 Kiểm: src/prompts.py — prompt có đủ 4 phần chưa, tên tool có khớp registry của
       Role 2 không, MAX_ITERATIONS đã đủ rộng cho chuỗi demo chưa.
 
-Chạy:  .venv\\Scripts\\python.exe tests\\test_role3.py
+Chạy:.venv\\Scripts\\python.exe tests\\test_role3.py
 """
 
 import re

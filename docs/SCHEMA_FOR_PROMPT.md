@@ -1,9 +1,9 @@
-# 📖 SCHEMA RÚT GỌN CHO PROMPT ENGINEER (Role 3)
+# SCHEMA RÚT GỌN CHO PROMPT ENGINEER (Role 3)
 
 > File này **sinh tự động** từ [`config/mock_database.json`](../config/mock_database.json) — không chỉnh tay, dữ liệu đổi thì chạy lại script.
 > Mục đích: để Role 3 viết ví dụ few-shot trong `REACT_SYSTEM_PROMPT` **dùng đúng dữ liệu có thật**.
 
-**Quy mô**: 1,000 học viên · 128 khóa học · 8 nhà cung cấp · 12 giảng viên.  
+**Quy mô**: 1,000 học viên · 128 khóa học · 8 nhà cung cấp · 12 giảng viên.
 **Ngày hệ thống (cố định)**: `2026-07-28`
 
 ---
@@ -33,7 +33,7 @@ Dùng bảng này để viết ví dụ — mọi mã khóa, giá, lịch đều
 | Mã | Tên | Chủ đề | Trình độ | HT | Giá | Lịch | Nơi | Chỗ | Hạn ĐK |
 | :-- | :-- | :-- | :-- | :-: | --: | :-- | :-- | :-: | :-- |
 | `EN101` | Tiếng Anh giao tiếp cơ bản | tiếng Anh, giao tiếp | mới bắt đầu | of | 3,500,000 | T2 19:00-21:00, T4 19:00-21:00 | Hà Nội | 18/25 | 2026-08-10 |
-| `EN201` ⛔ | IELTS 6.5 cấp tốc | tiếng Anh, IELTS | trung cấp | of | 8,000,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 20/20 | 2026-08-15 |
+| `EN201`  | IELTS 6.5 cấp tốc | tiếng Anh, IELTS | trung cấp | of | 8,000,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 20/20 | 2026-08-15 |
 | `EN301` ⏰ | Tiếng Anh thương mại | tiếng Anh, công việc | trung cấp | of | 5,000,000 | T2 19:00-21:00, T4 19:00-21:00 | Hà Nội | 14/20 | 2026-07-15 |
 | `EN102` | Tiếng Anh giao tiếp online | tiếng Anh, giao tiếp | mới bắt đầu | on | 1,200,000 | tự học | — | ∞ | — |
 | `PR101` | Nhập môn lập trình Python | lập trình, python | mới bắt đầu | on | 990,000 | tự học | — | ∞ | — |
@@ -161,7 +161,7 @@ Dùng bảng này để viết ví dụ — mọi mã khóa, giá, lịch đều
 | `MUX104` | Âm nhạc chuyên sâu | âm nhạc | trung cấp | of | 3,550,000 | T2 19:00-21:00, T4 19:00-21:00 | Hà Nội | 5/21 | 2026-09-05 |
 | `MUX105` | Âm nhạc nâng cao | âm nhạc | nâng cao | on | 11,810,000 | tự học | — | ∞ | — |
 
-⛔ = lớp đã đầy · ⏰ = hết hạn đăng ký · ∞ = online không giới hạn chỗ
+ = lớp đã đầy · ⏰ = hết hạn đăng ký · ∞ = online không giới hạn chỗ
 
 ---
 
@@ -278,7 +278,7 @@ Dùng bảng này để viết ví dụ — mọi mã khóa, giá, lịch đều
 }
 ```
 
-> ⚠️ Khóa **online** có `lich_hoc: []`, `khai_giang/han_dang_ky/dia_diem: null`, `si_so: null` (không giới hạn chỗ). Khóa **offline** thì đủ cả.
+>  Khóa **online** có `lich_hoc: []`, `khai_giang/han_dang_ky/dia_diem: null`, `si_so: null` (không giới hạn chỗ). Khóa **offline** thì đủ cả.
 
 ---
 
@@ -325,7 +325,7 @@ Không phù hợp. Lý do: vượt ngân sách (15,000,000 > 2,000,000); trình 
 LỖI: Không tìm thấy học viên có số điện thoại '0000000000'.
 ```
 
-> 🔑 Mọi lỗi đều bắt đầu bằng `LỖI:`. Prompt phải dạy LLM: gặp `LỖI:` thì **dừng và báo lịch sự**, tuyệt đối không đoán hay bịa dữ liệu thay thế.
+>  Mọi lỗi đều bắt đầu bằng `LỖI:`. Prompt phải dạy LLM: gặp `LỖI:` thì **dừng và báo lịch sự**, tuyệt đối không đoán hay bịa dữ liệu thay thế.
 
 ---
 

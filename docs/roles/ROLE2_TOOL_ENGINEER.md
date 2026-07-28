@@ -1,4 +1,4 @@
-# 🛠️ ROLE 2 — TOOL ENGINEER
+# ROLE 2 — TOOL ENGINEER
 
 | | |
 | :-- | :-- |
@@ -10,7 +10,7 @@
 
 ---
 
-## 🎯 Đề tài & việc của bạn
+## Đề tài & việc của bạn
 
 **Trợ Lý Đăng Ký Khóa Học — marketplace khóa học bên ngoài** (online tự học + lớp offline tại trung tâm). Học viên định danh bằng **số điện thoại**.
 
@@ -19,12 +19,12 @@ Bạn viết các **"đồ nghề"** mà Agent gọi được. Hai yêu cầu kh
 1. **Docstring phải rõ** — LLM đọc docstring để biết khi nào gọi tool nào. Mơ hồ = Agent gọi sai tool.
 2. **Không bao giờ crash** — gặp lỗi phải `return` chuỗi báo lỗi, để Agent đọc `Observation` rồi tự xử lý.
 
-📦 Dữ liệu đã có sẵn: [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa, 5 nhà cung cấp, 6 giảng viên.
-📘 Chi tiết từng trường: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
+ Dữ liệu đã có sẵn: [`config/mock_database.json`](../../config/mock_database.json) — 1000 học viên, 13 khóa, 5 nhà cung cấp, 6 giảng viên.
+ Chi tiết từng trường: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md).
 
 ---
 
-## 📍 MỐC 1 (20 phút) — Load database & chốt danh sách tool
+## MỐC 1 (20 phút) — Load database & chốt danh sách tool
 
 ```python
 import json, os
@@ -57,7 +57,7 @@ NGAY_HIEN_TAI = _DB["_meta"]["ngay_hien_tai"]   # "2026-07-28"
 
 ---
 
-## 📍 MỐC 2 (30 phút) — Viết tool + Docstring chuẩn
+## MỐC 2 (30 phút) — Viết tool + Docstring chuẩn
 
 ### Mẫu một tool chuẩn
 
@@ -106,16 +106,16 @@ AVAILABLE_TOOLS = {
 
 ---
 
-## 📍 MỐC 3 (60 phút) — `check_suitability`, tool ăn điểm nhất
+## MỐC 3 (60 phút) — `check_suitability`, tool ăn điểm nhất
 
 Kiểm **5 chiều**, và phải trả về **lý do cụ thể** chứ không phải `True/False`:
 
 ```
-ngân sách  → gia <= ngan_sach
-trình độ   → CAP_DO.index(trinh_do) >= CAP_DO.index(trinh_do_yeu_cau)
-lịch       → mọi buổi trong lich_hoc phải thuộc lich_ranh        (bỏ qua nếu online)
-khu vực    → dia_diem == khu_vuc                                 (bỏ qua nếu online)
-chỗ + hạn  → da_dang_ky < si_so, và han_dang_ky >= NGAY_HIEN_TAI (bỏ qua nếu online)
+ngân sách   gia <= ngan_sach
+trình độ    CAP_DO.index(trinh_do) >= CAP_DO.index(trinh_do_yeu_cau)
+lịch        mọi buổi trong lich_hoc phải thuộc lich_ranh        (bỏ qua nếu online)
+khu vực     dia_diem == khu_vuc                                 (bỏ qua nếu online)
+chỗ + hạn   da_dang_ky < si_so, và han_dang_ky >= NGAY_HIEN_TAI (bỏ qua nếu online)
 ```
 
 Kết quả mong muốn:
@@ -138,7 +138,7 @@ def buoi_cua(lich: str) -> str:
 
 ---
 
-## ⚠️ Ba cái bẫy trong dữ liệu dễ làm code văng
+## Ba cái bẫy trong dữ liệu dễ làm code văng
 
 | Bẫy | Ở đâu | Xử lý |
 | :-- | :-- | :-- |
@@ -148,11 +148,11 @@ def buoi_cua(lich: str) -> str:
 
 Cách gọn nhất: kiểm `if kh["hinh_thuc"] == "offline"` rồi mới chạy 3 chiều lịch / khu vực / chỗ + hạn.
 
-> 🔒 Dùng `NGAY_HIEN_TAI` từ file, **đừng dùng `datetime.now()`**. Ngày cố định thì test case của Role 1 chạy lúc nào cũng ra kết quả giống nhau.
+>  Dùng `NGAY_HIEN_TAI` từ file, **đừng dùng `datetime.now()`**. Ngày cố định thì test case của Role 1 chạy lúc nào cũng ra kết quả giống nhau.
 
 ---
 
-## 🧪 Tự test chống crash
+## Tự test chống crash
 
 Role 1 sẽ ném câu bẫy vào Agent. Tool phải sống sót:
 
@@ -184,7 +184,7 @@ Tool của bạn phải ra đúng 6 dòng này.
 
 ---
 
-## 🧪 Tự chấm — chạy bất cứ lúc nào
+## Tự chấm — chạy bất cứ lúc nào
 
 ```bash
 .venv\Scripts\python.exe tests\test_role2.py
@@ -194,7 +194,7 @@ Test này chấm 18 mục và in ra **chính xác còn phải sửa gì**. Nó t
 
 - Đủ 4 tool lõi trong `AVAILABLE_TOOLS` chưa
 - Docstring có `Args` / `Returns` / câu "Dùng tool này khi..." chưa
-- Gọi thật với SĐT sai, mã khóa sai, tham số rỗng → có trả `LỖI:` hay **crash**
+- Gọi thật với SĐT sai, mã khóa sai, tham số rỗng  có trả `LỖI:` hay **crash**
 - Khóa online có bị in ra `None` không (bẫy `si_so = null`)
 - **Đủ 7 kết quả `check_suitability` ở bảng trên** — sai chiều nào nó chỉ đúng chiều đó
 
@@ -202,7 +202,7 @@ Chạy tới khi thấy `COVERAGE: 18/18` là xong phần bạn.
 
 ---
 
-## 🌟 Công việc làm thêm — So sánh Chatbot thường và ReAct Agent
+## Công việc làm thêm — So sánh Chatbot thường và ReAct Agent
 
 Ngoài nhiệm vụ Tool Engineer, Role 2 còn thực hiện phần **so sánh thực nghiệm**
 giữa Chatbot thường và ReAct Agent trong
@@ -234,7 +234,7 @@ Observation làm bằng chứng cho câu trả lời cuối.
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 - [ ] Mốc 1: Load được `mock_database.json`, chốt danh sách tool với nhóm
 - [ ] Mốc 2: Viết 4 tool lõi, mỗi tool có docstring "Dùng tool này khi..."
@@ -246,7 +246,7 @@ Observation làm bằng chứng cho câu trả lời cuối.
 
 ---
 
-## 🔄 Git
+## Git
 
 ```bash
 git checkout role2-tool-engineer

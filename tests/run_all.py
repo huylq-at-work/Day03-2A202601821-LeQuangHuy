@@ -1,7 +1,7 @@
 """
 Bảng điều khiển cho Role 4 (Integrator): chạy cả 4 bộ test, tổng hợp coverage.
 
-Chạy:  .venv\\Scripts\\python.exe tests\\run_all.py
+Chạy:.venv\\Scripts\\python.exe tests\\run_all.py
 """
 
 import os
@@ -33,11 +33,11 @@ for tep, ten, file_giu in VAI:
     ket_qua.append((ten, file_giu, dat, tong, can_sua, tep))
 
 print("=" * 70)
-print("  BẢNG ĐIỀU KHIỂN — TIẾN ĐỘ CẢ NHÓM")
+print("BẢNG ĐIỀU KHIỂN — TIẾN ĐỘ CẢ NHÓM")
 print("=" * 70)
 print()
-print(f"  {'Vai trò':<16}{'File giữ':<26}{'Coverage':>14}")
-print("  " + "-" * 58)
+print(f"{'Vai trò':<16}{'File giữ':<26}{'Coverage':>14}")
+print("" + "-" * 58)
 
 t_dat = t_tong = 0
 for ten, file_giu, dat, tong, _, _ in ket_qua:
@@ -45,25 +45,25 @@ for ten, file_giu, dat, tong, _, _ in ket_qua:
     t_tong += tong
     pct = round(dat / tong * 100) if tong else 0
     thanh = "#" * (pct // 10) + "." * (10 - pct // 10)
-    print(f"  {ten:<16}{file_giu:<26}{thanh} {dat:>2}/{tong:<2} {pct:>3}%")
+    print(f"{ten:<16}{file_giu:<26}{thanh} {dat:>2}/{tong:<2} {pct:>3}%")
 
-print("  " + "-" * 58)
+print("" + "-" * 58)
 pct = round(t_dat / t_tong * 100) if t_tong else 0
-print(f"  {'TỔNG':<42}{t_dat:>2}/{t_tong:<2} {pct:>3}%")
+print(f"{'TỔNG':<42}{t_dat:>2}/{t_tong:<2} {pct:>3}%")
 print()
 
 for ten, _, dat, tong, can_sua, tep in ket_qua:
     if not can_sua:
-        print(f"  {ten}: xong hết")
+        print(f"{ten}: xong hết")
         continue
     print(f"\n  {ten} — còn {len(can_sua)} việc:")
     for x in can_sua[:5]:
-        print(f"    - {x[:100]}")
+        print(f"- {x[:100]}")
     if len(can_sua) > 5:
-        print(f"    ... và {len(can_sua) - 5} việc nữa: python tests/{tep}")
+        print(f"... và {len(can_sua) - 5} việc nữa: python tests/{tep}")
 
 print()
 print("=" * 70)
-print("  Chạy riêng từng vai:  python tests/test_role1.py")
+print("Chạy riêng từng vai:  python tests/test_role1.py")
 print("=" * 70)
 sys.exit(0 if t_dat == t_tong else 1)

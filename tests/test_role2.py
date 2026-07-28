@@ -3,7 +3,7 @@ TEST ROLE 2 — Nguyễn Chí Hướng (Tool Engineer)
 Kiểm: src/tools.py — có đủ tool chưa, docstring chuẩn chưa, có crash không,
       và kết quả check_suitability có khớp 7 trường hợp đã kiểm chứng không.
 
-Chạy:  .venv\\Scripts\\python.exe tests\\test_role2.py
+Chạy:.venv\\Scripts\\python.exe tests\\test_role2.py
 """
 
 import sys
@@ -124,7 +124,7 @@ if "search_courses" in REG:
     for cach_noi in ["", "không giới hạn", "bao nhiêu cũng được"]:
         r = c.thu(f"search_courses('vật lý', {cach_noi!r})",
                   goi("search_courses", "vật lý", cach_noi))
-        c.ok(f"  -> không báo lỗi với {cach_noi!r}",
+        c.ok(f"-> không báo lỗi với {cach_noi!r}",
              isinstance(r, str) and not r.strip().upper().startswith("LỖI"),
              f"Ngân sách {cach_noi!r} nghĩa là không giới hạn, không được trả LỖI")
 

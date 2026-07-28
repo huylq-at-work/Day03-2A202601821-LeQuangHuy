@@ -1,5 +1,5 @@
 """
-🔌 MULTI-PROVIDER LLM ADAPTER (OpenAI, Gemini, Anthropic, OpenRouter & Offline Mock)
+ MULTI-PROVIDER LLM ADAPTER (OpenAI, Gemini, Anthropic, OpenRouter & Offline Mock)
 Hỗ trợ chuyển đổi linh hoạt giữa các nhà cung cấp AI chỉ bằng cách đổi biến môi trường LLM_PROVIDER.
 """
 
@@ -29,7 +29,7 @@ class GeminiProvider(BaseLLMProvider):
     def __init__(self, api_key: str = None, model: str = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         self.model_name = model or os.getenv("LLM_MODEL") or "gemini-2.5-flash"
-        
+
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         if not self.api_key or self.api_key == "your_gemini_api_key_here":
             return "[Gemini Error]: Chưa cấu hình GEMINI_API_KEY trong file .env!"
@@ -51,7 +51,7 @@ class OpenAIProvider(BaseLLMProvider):
     def __init__(self, api_key: str = None, model: str = None):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         self.model_name = model or os.getenv("LLM_MODEL") or "gpt-4o-mini"
-        
+
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         if not self.api_key or self.api_key == "your_openai_api_key_here":
             return "[OpenAI Error]: Chưa cấu hình OPENAI_API_KEY trong file .env!"
@@ -62,7 +62,7 @@ class OpenAIProvider(BaseLLMProvider):
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
-            
+
             response = client.chat.completions.create(
                 model=self.model_name,
                 messages=messages
@@ -77,7 +77,7 @@ class AnthropicProvider(BaseLLMProvider):
     def __init__(self, api_key: str = None, model: str = None):
         self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         self.model_name = model or os.getenv("LLM_MODEL") or "claude-3-haiku-20240307"
-        
+
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         if not self.api_key or self.api_key == "your_anthropic_api_key_here":
             return "[Anthropic Error]: Chưa cấu hình ANTHROPIC_API_KEY trong file .env!"
@@ -91,7 +91,7 @@ class AnthropicProvider(BaseLLMProvider):
             }
             if system_prompt:
                 kwargs["system"] = system_prompt
-                
+
             response = client.messages.create(**kwargs)
             return response.content[0].text
         except Exception as e:
@@ -103,7 +103,7 @@ class OpenRouterProvider(BaseLLMProvider):
     def __init__(self, api_key: str = None, model: str = None):
         self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
         self.model_name = model or os.getenv("LLM_MODEL") or "google/gemini-2.5-flash"
-        
+
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         if not self.api_key or self.api_key == "your_openrouter_api_key_here":
             return "[OpenRouter Error]: Chưa cấu hình OPENROUTER_API_KEY trong file .env!"
@@ -116,7 +116,7 @@ class OpenRouterProvider(BaseLLMProvider):
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
-            
+
             payload = {
                 "model": self.model_name,
                 "messages": messages
@@ -198,7 +198,7 @@ class MockProvider(BaseLLMProvider):
 def get_llm_provider(provider_name: str = None) -> BaseLLMProvider:
     """Factory function tự chọn Provider từ biến môi trường LLM_PROVIDER"""
     name = (provider_name or os.getenv("LLM_PROVIDER") or "mock").lower().strip()
-    
+
     if name == "gemini":
         return GeminiProvider()
     elif name == "openai":
@@ -214,6 +214,6 @@ def get_llm_provider(provider_name: str = None) -> BaseLLMProvider:
 if __name__ == "__main__":
     print("=== TEST MULTI-PROVIDER LLM ADAPTER ===")
     provider = get_llm_provider()
-    print(f"✅ Provider đang dùng: {provider.__class__.__name__}")
-    print(f"🤖 User Query: Hello")
-    print(f"💬 Response  : {provider.generate('Hello')}")
+    print(f" Provider đang dùng: {provider.__class__.__name__}")
+    print(f" User Query: Hello")
+    print(f" Response: {provider.generate('Hello')}")

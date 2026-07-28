@@ -124,10 +124,10 @@ LOI_XIN_LOI_GUARDRAIL = ("Xin lỗi, mình chưa tra được thông tin bạn c
 
 
 # ===========================================================================
-# 🎁 BONUS — AI CẤP 4: AUTONOMOUS AGENT
+# BONUS — AI CẤP 4: AUTONOMOUS AGENT
 # Cấp 3 (ReAct) chỉ phản ứng từng bước. Cấp 4 thêm hai năng lực:
-#   - Planning: tự chia mục tiêu thành các bước nhỏ TRƯỚC khi hành động
-#   - Memory  : nhớ dữ kiện đã tra, lượt sau không phải gọi lại tool
+# - Planning: tự chia mục tiêu thành các bước nhỏ TRƯỚC khi hành động
+# - Memory: nhớ dữ kiện đã tra, lượt sau không phải gọi lại tool
 # ===========================================================================
 
 # Tool chỉ đọc dữ liệu -> an toàn để nhớ lại kết quả.
@@ -229,7 +229,7 @@ def react_steps(user_query: str, provider, lich_su=None, bo_nho=None, ke_hoach=N
 
     if ke_hoach:
         history += ("Kế hoạch đã vạch sẵn, hãy bám theo:\n"
-                    + "\n".join(f"  {i}. {b}" for i, b in enumerate(ke_hoach, 1)) + "\n")
+                    + "\n".join(f"{i}. {b}" for i, b in enumerate(ke_hoach, 1)) + "\n")
 
     for vong in range(1, MAX_ITERATIONS + 1):
         # 1. Hỏi LLM xem bước tiếp theo làm gì
@@ -302,7 +302,7 @@ def run_react_agent(user_query: str, provider):
 
 def run_autonomous_agent(user_query: str, provider, bo_nho=None, lich_su=None):
     """
-    🎁 BONUS — Agent Cấp 4: Planning + Memory.
+     BONUS — Agent Cấp 4: Planning + Memory.
 
     Khác run_react_agent() ở hai chỗ:
       1. Lập kế hoạch trước rồi mới vào vòng lặp
@@ -312,11 +312,11 @@ def run_autonomous_agent(user_query: str, provider, bo_nho=None, lich_su=None):
 
     ke_hoach = lap_ke_hoach(user_query, provider, lich_su)
     if ke_hoach:
-        print("\n--- 📋 PLANNING: tự chia mục tiêu ---")
+        print("\n---  PLANNING: tự chia mục tiêu ---")
         for i, b in enumerate(ke_hoach, 1):
-            print(f"  {i}. {b}")
+            print(f"{i}. {b}")
     else:
-        print("\n--- 📋 PLANNING: không lập được kế hoạch, chạy ReAct thường ---")
+        print("\n---  PLANNING: không lập được kế hoạch, chạy ReAct thường ---")
 
     if bo_nho is None:
         bo_nho = BoNho()
@@ -336,11 +336,11 @@ def run_autonomous_agent(user_query: str, provider, bo_nho=None, lich_su=None):
             print("[!] LLM không sinh đúng định dạng Action. Dừng an toàn.")
             print(f"Trả lời: {b['final']}")
             return bo_nho
-        nguon = " 🧠 (lấy từ bộ nhớ, không gọi tool)" if b.get("tu_bo_nho") else ""
+        nguon = "(lấy từ bộ nhớ, không gọi tool)" if b.get("tu_bo_nho") else ""
         print(f"Observation: {b['observation']}{nguon}")
 
     tiet_kiem = bo_nho.so_lan_dung - truoc
-    print(f"\n--- 🧠 MEMORY: đang nhớ {len(bo_nho.cache)} kết quả tool"
+    print(f"\n---  MEMORY: đang nhớ {len(bo_nho.cache)} kết quả tool"
           f"{f', tiết kiệm {tiet_kiem} lần gọi ở lượt này' if tiet_kiem else ''} ---")
     return bo_nho
 
@@ -360,12 +360,12 @@ if __name__ == "__main__":
 
     # python src/app.py 3      -> chạy test case số 3
     # python src/app.py all    -> chạy cả 5 test case
-    # python src/app.py auto   -> 🎁 demo Agent Cấp 4 (Planning + Memory)
+    # python src/app.py auto   ->  demo Agent Cấp 4 (Planning + Memory)
     arg = sys.argv[1] if len(sys.argv) > 1 else "3"
 
     if arg == "auto":
         print("\n" + "=" * 50)
-        print("🎁 BONUS — AI CẤP 4: AUTONOMOUS AGENT")
+        print(" BONUS — AI CẤP 4: AUTONOMOUS AGENT")
         print("=" * 50)
         print("Hai lượt hỏi cùng một học viên. Lượt 2 phải lấy hồ sơ từ bộ nhớ,")
         print("không gọi lại get_learner — đó là điểm khác so với Cấp 3.")

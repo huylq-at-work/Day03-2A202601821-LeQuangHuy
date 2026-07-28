@@ -2,7 +2,7 @@
 TEST ROLE 1 — Nguyễn Tiến Đạt (Product Architect & Observability)
 Kiểm: config/test_cases.json + docs/trace_eval.md + docs/hybrid_flowchart.mermaid
 
-Chạy:  .venv\\Scripts\\python.exe tests\\test_role1.py
+Chạy:.venv\\Scripts\\python.exe tests\\test_role1.py
 """
 
 import json
@@ -43,16 +43,16 @@ c.ok("Mọi case đủ 4 trường (id/category/question/expected_behavior)", tr
 # ---------------------------------------------------------------- phân loại
 c.muc("[2] Phân bố loại câu hỏi")
 
-def dem(dau):
-    return sum(1 for t in tests if dau in t.get("category", ""))
+def dem(tu_khoa):
+    return sum(1 for t in tests if tu_khoa.lower() in t.get("category", "").lower())
 
-n_de, n_multi, n_bay = dem("🟢"), dem("🟡"), dem("🔴")
+n_de, n_multi, n_bay = dem("Đơn giản"), dem("Multi-step"), dem("Edge Case")
 c.ok(f"Có >=2 câu đơn giản (đang có {n_de})", n_de >= 2,
-     "Thêm câu đơn giản, category chứa 🟢")
+     "Thêm câu đơn giản, category ghi 'Đơn giản'")
 c.ok(f"Có >=2 câu multi-step (đang có {n_multi})", n_multi >= 2,
-     "Thêm câu multi-step, category chứa 🟡")
+     "Thêm câu multi-step, category ghi 'Multi-step'")
 c.ok(f"Có >=1 câu bẫy (đang có {n_bay})", n_bay >= 1,
-     "Thêm câu edge case, category chứa 🔴")
+     "Thêm câu edge case, category ghi 'Edge Case'")
 
 # ---------------------------------------------------------------- đúng domain
 c.muc("[3] Bám đúng đề tài marketplace khóa học")
@@ -77,7 +77,7 @@ c.ok("Mã khóa nhắc tới đều có thật (trừ câu bẫy)",
 # ---------------------------------------------------------------- câu bẫy
 c.muc("[4] Chất lượng câu bẫy")
 
-cau_bay = [t for t in tests if "🔴" in t.get("category", "")]
+cau_bay = [t for t in tests if "edge case" in t.get("category", "").lower()]
 bay_txt = json.dumps(cau_bay, ensure_ascii=False)
 sdt_bay = set(re.findall(r"\b0\d{9}\b", bay_txt))
 c.ok("Câu bẫy dùng dữ liệu KHÔNG tồn tại", bool(sdt_bay - SDT_THAT) or "999" in bay_txt,

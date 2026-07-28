@@ -30,7 +30,7 @@ gia        = sorted(c["gia"] for c in C.values())
 b = io.StringIO()
 w = b.write
 
-w("# 📖 SCHEMA RÚT GỌN CHO PROMPT ENGINEER (Role 3)\n\n")
+w("#  SCHEMA RÚT GỌN CHO PROMPT ENGINEER (Role 3)\n\n")
 w("> File này **sinh tự động** từ [`config/mock_database.json`](../config/mock_database.json) — "
   "không chỉnh tay, dữ liệu đổi thì chạy lại script.\n")
 w("> Mục đích: để Role 3 viết ví dụ few-shot trong `REACT_SYSTEM_PROMPT` **dùng đúng dữ liệu có thật**.\n\n")
@@ -64,12 +64,12 @@ for ma, c in C.items():
     dd = c["dia_diem"] or "—"
     note = ""
     if c["si_so"] and c["da_dang_ky"] >= c["si_so"]:
-        note = " ⛔"
+        note = " "
     if c["han_dang_ky"] and c["han_dang_ky"] < meta["ngay_hien_tai"]:
         note += " ⏰"
     w(f"| `{ma}`{note} | {c['ten']} | {', '.join(c['chu_de'])} | {c['trinh_do_yeu_cau']} | "
       f"{c['hinh_thuc'][:2]} | {c['gia']:,} | {lich} | {dd} | {cho} | {han} |\n")
-w("\n⛔ = lớp đã đầy · ⏰ = hết hạn đăng ký · ∞ = online không giới hạn chỗ\n\n")
+w("\n = lớp đã đầy · ⏰ = hết hạn đăng ký · ∞ = online không giới hạn chỗ\n\n")
 w("---\n\n")
 
 w("## 3. Bốn học viên dùng để viết ví dụ\n\n")
@@ -95,7 +95,7 @@ skeleton = {
 }
 w(json.dumps(skeleton, ensure_ascii=False, indent=2))
 w("\n```\n\n")
-w("> ⚠️ Khóa **online** có `lich_hoc: []`, `khai_giang/han_dang_ky/dia_diem: null`, "
+w(">  Khóa **online** có `lich_hoc: []`, `khai_giang/han_dang_ky/dia_diem: null`, "
   "`si_so: null` (không giới hạn chỗ). Khóa **offline** thì đủ cả.\n\n")
 w("---\n\n")
 
@@ -127,7 +127,7 @@ w("Không phù hợp. Lý do: vượt ngân sách (15,000,000 > 2,000,000); "
   "trình độ chưa đạt (mới bắt đầu < trung cấp); lịch không khớp (T3 tối, T5 tối).\n```\n\n")
 w("**`get_learner[0000000000]`** — trường hợp lỗi\n\n```\n")
 w("LỖI: Không tìm thấy học viên có số điện thoại '0000000000'.\n```\n\n")
-w("> 🔑 Mọi lỗi đều bắt đầu bằng `LỖI:`. Prompt phải dạy LLM: gặp `LỖI:` thì **dừng và báo lịch sự**, "
+w(">  Mọi lỗi đều bắt đầu bằng `LỖI:`. Prompt phải dạy LLM: gặp `LỖI:` thì **dừng và báo lịch sự**, "
   "tuyệt đối không đoán hay bịa dữ liệu thay thế.\n\n")
 w("---\n\n")
 

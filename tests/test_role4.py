@@ -3,7 +3,7 @@ TEST ROLE 4 — Lê Quang Huy (Core Developer / Integrator)
 Kiểm: src/app.py — vòng lặp ReAct chạy đúng chưa, 3 lớp phòng thủ có hoạt động
       không, và app có bị trói vào file của Role 2 không.
 
-Chạy:  .venv\\Scripts\\python.exe tests\\test_role4.py
+Chạy:.venv\\Scripts\\python.exe tests\\test_role4.py
 """
 
 import io
@@ -168,7 +168,7 @@ else:
          "Thiếu hàm chặn LLM tự bịa Observation")
 
 # ---------------------------------------------------------------- môi trường
-c.muc("[6B] 🎁 BONUS — Agent Cấp 4: Planning + Memory")
+c.muc("[6B]  BONUS — Agent Cấp 4: Planning + Memory")
 
 BoNho = getattr(app, "BoNho", None)
 c.ok("Có lớp BoNho (Memory)", BoNho is not None, "Thiếu lớp BoNho trong app.py")

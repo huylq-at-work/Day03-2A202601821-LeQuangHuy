@@ -264,18 +264,18 @@ db = {"_meta": {"ngay_hien_tai": NGAY_HIEN_TAI,
 
 buf = io.StringIO()
 buf.write("{\n")
-buf.write('  "_meta": ' + json.dumps(db["_meta"], ensure_ascii=False, indent=2).replace("\n", "\n  ") + ",\n\n")
-buf.write('  "learners": {\n')
+buf.write('"_meta": ' + json.dumps(db["_meta"], ensure_ascii=False, indent=2).replace("\n", "\n  ") + ",\n\n")
+buf.write('"learners": {\n')
 items = list(learners.items())
 for i, (k, v) in enumerate(items):
     comma = "," if i < len(items) - 1 else ""
-    buf.write(f'    "{k}": {json.dumps(v, ensure_ascii=False, separators=(", ", ": "))}{comma}\n')
-buf.write("  },\n\n")
+    buf.write(f'"{k}": {json.dumps(v, ensure_ascii=False, separators=(", ", ": "))}{comma}\n')
+buf.write("},\n\n")
 for key in ("courses", "providers", "instructors"):
     body = json.dumps(db[key], ensure_ascii=False, indent=2)
-    body = "\n".join("  " + ln for ln in body.splitlines()).lstrip()
+    body = "\n".join("" + ln for ln in body.splitlines()).lstrip()
     tail = ",\n\n" if key != "instructors" else "\n"
-    buf.write(f'  "{key}": {body}{tail}')
+    buf.write(f'"{key}": {body}{tail}')
 buf.write("}\n")
 
 with open(OUT, "w", encoding="utf-8") as f:

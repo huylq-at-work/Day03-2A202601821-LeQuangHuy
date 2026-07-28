@@ -4,7 +4,7 @@ Chạy thật cả 5 test case rồi ghi trace log vào docs/trace_eval.md.
 Giữ nguyên phần Scoring Matrix (mục 1) do Role 1 tự viết, chỉ sinh lại mục 2
 là phần trace log — vốn bắt buộc phải là output thật của chương trình.
 
-Chạy:  .venv\\Scripts\\python.exe scripts\\gen_trace_eval.py
+Chạy:.venv\\Scripts\\python.exe scripts\\gen_trace_eval.py
 Cần có API key thật trong .env, chạy bằng MockProvider sẽ ra trace giả lập.
 """
 
@@ -30,7 +30,7 @@ provider = get_llm_provider()
 ten_provider = provider.__class__.__name__
 if ten_provider == "MockProvider":
     print("[!] Đang dùng MockProvider — trace sinh ra là giả lập, KHÔNG dùng để nộp bài.")
-    print("    Điền API key thật vào .env rồi chạy lại.")
+    print("Điền API key thật vào .env rồi chạy lại.")
 
 with open(TESTS, encoding="utf-8") as f:
     cases = json.load(f)
@@ -116,7 +116,7 @@ if BAT_DAU in cu and KET_THUC in cu:
 else:
     # Lần đầu chạy: mục 1 là phần đầu, từ mục 3 trở đi là phần đuôi cần giữ
     dau = cu.split("## 2.")[0].rstrip() if "## 2." in cu else \
-        "# 🟢 Role 1: Đánh Giá Agentic Fit & Trace Log"
+        "#  Role 1: Đánh Giá Agentic Fit & Trace Log"
     duoi = ""
     for moc in ("## 3.", "## 4."):
         if moc in cu:
@@ -149,4 +149,4 @@ with open(OUT, "w", encoding="utf-8") as f:
     f.write(than)
 
 print(f"\nĐã ghi {OUT}")
-print(f"  {len(cases)} test case, provider: {ten_provider}")
+print(f"{len(cases)} test case, provider: {ten_provider}")

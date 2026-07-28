@@ -1,4 +1,4 @@
-# 👥 DANH SÁCH THÀNH VIÊN NHÓM
+# DANH SÁCH THÀNH VIÊN NHÓM
 
 > Bài Lab 3: Chatbot vs ReAct Agent — Đại học VinUni
 
@@ -6,7 +6,7 @@
 
 | STT | Họ và tên | Mã sinh viên |
 | :-: | :-- | :-- |
-| 1 | Nguyễn Chí Hướng | 2A202601203 
+| 1 | Nguyễn Chí Hướng | 2A202601203
 | 2 | Nguyễn Tiến Đạt | 2A202601387
 | 3 | Phạm Thị Liên | 2A202601795
 | 4 | Lê Quang Huy | 2A202601821
@@ -15,7 +15,7 @@
 
 Đề tài nhóm: **Trợ Lý Đăng Ký Khóa Học** — marketplace khóa học bên ngoài (khóa online tự học + lớp offline tại trung tâm). Học viên định danh bằng số điện thoại. Trục suy luận: **ngân sách + lịch rảnh + trình độ + khu vực + hình thức**.
 
-📦 Dữ liệu: [`config/mock_database.json`](config/mock_database.json) · 📘 Schema: [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)
+ Dữ liệu: [`config/mock_database.json`](config/mock_database.json) ·  Schema: [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)
 
 | Thành viên | Vai trò | Branch | File giữ | Hướng dẫn |
 | :-- | :-- | :-- | :-- | :-- |
@@ -24,11 +24,11 @@
 | Phạm Thị Liên | Prompt & Safeguard Engineer | `role3-prompt-engineer` | `src/prompts.py` | [ROLE3](docs/roles/ROLE3_PROMPT_ENGINEER.md) |
 | Lê Quang Huy | Core Developer / Integrator | `role4-core-developer` | `src/app.py` | [ROLE4](docs/roles/ROLE4_CORE_DEVELOPER.md) |
 
-> Bài Lab gốc chia 5 vai; nhóm 4 người nên Role 5 (Observability) chia vào Role 1,2 
+> Bài Lab gốc chia 5 vai; nhóm 4 người nên Role 5 (Observability) chia vào Role 1,2
 
 ## 3. Quy trình Git
 
-Mỗi người làm trên branch riêng, giữ đúng 1 file → không conflict.
+Mỗi người làm trên branch riêng, giữ đúng 1 file  không conflict.
 
 **Lần đầu — lấy branch của mình về:**
 
