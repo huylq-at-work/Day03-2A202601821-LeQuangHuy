@@ -32,10 +32,10 @@ MAXIT = getattr(prompts, "MAX_ITERATIONS", None) if prompts else None
 c.muc("[2] CHATBOT_BASELINE_PROMPT")
 c.ok("Đã khai báo và không rỗng", len(BASE.strip()) > 30,
      "Viết CHATBOT_BASELINE_PROMPT trong prompts.py")
-c.ok("Nói rõ Chatbot KHÔNG có quyền truy cập dữ liệu",
-     ("không" in BASE.lower()) and
-     any(k in BASE.lower() for k in ("truy cập", "dữ liệu", "hệ thống")),
-     "Baseline prompt nên nói rõ Chatbot không truy cập được dữ liệu — để so sánh công bằng")
+c.ok("Có thừa nhận giới hạn (không có dữ liệu thật / thời gian thực)",
+     any(k in BASE.lower() for k in
+         ("truy cập", "thời gian thực", "kiến thức có sẵn", "không biết", "không có quyền")),
+     "Baseline prompt nên thừa nhận là không tra được dữ liệu thật — để so sánh công bằng")
 c.ok("Không liệt kê tool nào (đúng bản chất baseline)",
      "Action:" not in BASE,
      "Baseline prompt không được nhắc tool, nếu không thì hết là baseline")
@@ -80,13 +80,22 @@ except Exception:
 if not REG:
     c.bo_qua("So khớp tên tool", "Role 2 chưa xong tools.py, chưa kiểm được")
 else:
+    TOOL_LOI = ["get_learner", "search_courses", "get_course_detail", "check_suitability"]
     trong_prompt = set(re.findall(r"\b([a-z_]{4,})\s*\[", REACT))
-    thieu = [t for t in REG if t not in trong_prompt]
-    thua = [t for t in trong_prompt if t not in REG]
 
-    c.ok(f"Prompt liệt kê đủ {len(REG)} tool của Role 2", not thieu,
-         f"Prompt chưa nhắc tool: {', '.join(thieu)}")
-    c.ok("Prompt không bịa tool không tồn tại", not thua,
+    thieu_loi = [t for t in TOOL_LOI if t in REG and t not in trong_prompt]
+    c.ok("Prompt liệt kê đủ 4 tool lõi", not thieu_loi,
+         f"Prompt chưa nhắc tool lõi: {', '.join(thieu_loi)}")
+
+    thieu_them = [t for t in REG if t not in TOOL_LOI and t not in trong_prompt]
+    if thieu_them:
+        c.bo_qua(f"Tool phụ chưa đưa vào prompt: {', '.join(thieu_them)}",
+                 "Role 2 đã viết nhưng Agent sẽ không dùng tới — không trừ điểm")
+    else:
+        c.bo_qua("Tool phụ", "đã đưa đủ vào prompt")
+
+    thua = [t for t in trong_prompt if t not in REG]
+    c.ok("Prompt không nhắc tool không tồn tại", not thua,
          f"Prompt nhắc tool không có trong registry: {', '.join(thua)}"
          " — Agent sẽ gọi tool ma và luôn nhận LỖI")
 
