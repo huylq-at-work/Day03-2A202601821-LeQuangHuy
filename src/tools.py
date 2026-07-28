@@ -65,6 +65,36 @@ def _parse_price(value: object) -> Optional[int]:
     return int(text)
 
 
+# Cách người dùng diễn đạt "không giới hạn ngân sách". Để trống cũng tính là không giới hạn.
+KHONG_GIOI_HAN = {
+    "", "không giới hạn", "khong gioi han", "ko giới hạn", "ko gioi han",
+    "không có giới hạn", "bao nhiêu cũng được", "bao nhieu cung duoc",
+    "bao nhiêu cũng đc", "tùy", "tuy", "không rõ", "khong ro", "chưa rõ",
+    "thoải mái", "thoai mai", "unlimited", "any", "none", "null", "-",
+}
+
+
+def _parse_ngan_sach(value: object):
+    """
+    Đọc ngân sách, chấp nhận cả trường hợp không giới hạn.
+
+    Returns:
+        (gia_tri, hop_le) — gia_tri là None nghĩa là KHÔNG GIỚI HẠN.
+        hop_le = False khi người dùng nhập bậy (chữ vô nghĩa, số âm).
+    """
+    if _clean(value).casefold() in KHONG_GIOI_HAN:
+        return None, True
+    so = _parse_price(value)
+    if so is None or so <= 0:
+        return None, False
+    return so, True
+
+
+def _mo_ta_ngan_sach(gia_tri) -> str:
+    """Hiển thị ngân sách cho người đọc, None thì ghi rõ là không giới hạn."""
+    return "không giới hạn" if gia_tri is None else _money(gia_tri)
+
+
 def _course(ma_khoa: object):
     """Lấy khóa học theo mã đã chuẩn hóa, không phân biệt hoa thường."""
     code = _clean(ma_khoa).upper()
@@ -120,7 +150,7 @@ def get_learner(sdt: str) -> str:
     return (
         f"{learner['ho_ten']} — mục tiêu: {', '.join(learner['muc_tieu'])}; "
         f"trình độ: {learner['trinh_do']}; "
-        f"ngân sách: {_money(learner['ngan_sach'])}; "
+        f"ngân sách: {_mo_ta_ngan_sach(learner['ngan_sach'])}; "
         f"rảnh: {', '.join(learner['lich_ranh'])}; "
         f"khu vực: {learner['khu_vuc']}."
     )
@@ -146,9 +176,10 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
     if not topic:
         return "LỖI: Thiếu tham số chủ đề."
 
-    max_price = _parse_price(gia_toi_da)
-    if max_price is None:
-        return "LỖI: Giá tối đa phải là số không âm."
+    max_price, hop_le = _parse_ngan_sach(gia_toi_da)
+    if not hop_le:
+        return ("LỖI: Giá tối đa phải là số dương. "
+                "Nếu học viên không giới hạn ngân sách thì để trống tham số này.")
 
     # Người dùng hỏi mơ hồ ("còn môn khác không?") thì duyệt toàn bộ danh mục
     # thay vì đi tìm đúng chữ "khác" — vốn không phải chủ đề nào cả.
@@ -163,14 +194,12 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
             topic_key == _clean(course_topic).casefold()
             for course_topic in course["chu_de"]
         )
-        if has_topic and course["gia"] <= max_price:
+        if has_topic and (max_price is None or course["gia"] <= max_price):
             matches.append((course["gia"], code, course))
 
     if not matches:
-        return (
-            f"Không tìm thấy khóa học nào về '{topic}' "
-            f"dưới {_money(max_price)}."
-        )
+        gioi_han = "" if max_price is None else f" dưới {_money(max_price)}"
+        return f"Không tìm thấy khóa học nào về '{topic}'{gioi_han}."
 
     matches.sort(key=lambda item: (item[0], item[1]))
 
@@ -204,7 +233,7 @@ def list_topics(gia_toi_da: str = "") -> str:
     Returns:
         str: Danh sách chủ đề, mỗi dòng gồm tên chủ đề, số khóa và giá thấp nhất.
     """
-    tran = _parse_price(gia_toi_da) if _clean(gia_toi_da) else None
+    tran, _ = _parse_ngan_sach(gia_toi_da)
 
     thong_ke = {}
     for course in COURSES.values():
@@ -308,7 +337,8 @@ def check_suitability(sdt: str, ma_khoa: str) -> str:
 
     reasons = []
 
-    if course["gia"] > learner["ngan_sach"]:
+    # ngan_sach = None nghĩa là học viên không đặt trần giá -> bỏ qua chiều này
+    if learner["ngan_sach"] is not None and course["gia"] > learner["ngan_sach"]:
         reasons.append(
             "vượt ngân sách "
             f"({course['gia']:,} > {learner['ngan_sach']:,})"
@@ -467,9 +497,10 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
         return (f"LỖI: Trình độ '{trinh_do}' không hợp lệ. "
                 f"Chỉ nhận: {', '.join(CAP_DO)}.")
 
-    tien = _parse_price(ngan_sach)
-    if tien is None or tien <= 0:
-        return f"LỖI: Ngân sách '{ngan_sach}' không hợp lệ, cần là số tiền dương."
+    tien, hop_le = _parse_ngan_sach(ngan_sach)
+    if not hop_le:
+        return (f"LỖI: Ngân sách '{ngan_sach}' không hợp lệ. Cần là số tiền dương, "
+                "hoặc ghi 'không giới hạn' nếu học viên không đặt trần giá.")
 
     def _tach(chuoi):
         return [x.strip() for x in _clean(chuoi).replace(",", "|").split("|") if x.strip()]
@@ -507,7 +538,7 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
 
     return (f"Đã tạo hồ sơ cho {ho_ten} — số điện thoại {sdt}; "
             f"mục tiêu: {', '.join(ds_muc_tieu)}; trình độ: {trinh_do}; "
-            f"ngân sách: {_money(tien)}; rảnh: {', '.join(ds_lich)}; "
+            f"ngân sách: {_mo_ta_ngan_sach(tien)}; rảnh: {', '.join(ds_lich)}; "
             f"khu vực: {ho_so['khu_vuc']}. Giờ có thể tìm khóa phù hợp cho học viên này.")
 
 

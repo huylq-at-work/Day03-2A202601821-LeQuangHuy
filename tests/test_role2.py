@@ -118,6 +118,43 @@ if "search_courses" in REG:
          isinstance(r_dai, str) and (r_dai.count("\n") <= 16),
          "128 khóa mà đổ hết ra thì Observation quá dài, phải giới hạn và ghi rõ còn bao nhiêu")
 
+c.muc("[5B] Ngân sách không giới hạn")
+
+if "search_courses" in REG:
+    for cach_noi in ["", "không giới hạn", "bao nhiêu cũng được"]:
+        r = c.thu(f"search_courses('vật lý', {cach_noi!r})",
+                  goi("search_courses", "vật lý", cach_noi))
+        c.ok(f"  -> không báo lỗi với {cach_noi!r}",
+             isinstance(r, str) and not r.strip().upper().startswith("LỖI"),
+             f"Ngân sách {cach_noi!r} nghĩa là không giới hạn, không được trả LỖI")
+
+    r = c.thu("search_courses('vật lý', 'abc') — nhập bậy",
+              goi("search_courses", "vật lý", "abc"))
+    c.ok("Vẫn từ chối giá trị vô nghĩa",
+         isinstance(r, str) and r.strip().upper().startswith("LỖI"),
+         "'abc' không phải 'không giới hạn', phải trả LỖI")
+
+if "dang_ky_hoc_vien" in REG and "check_suitability" in REG and "get_learner" in REG:
+    sdt_vh = "0900000288"
+    r = c.thu("Đăng ký học viên ngân sách không giới hạn",
+              lambda: REG["dang_ky_hoc_vien"](sdt_vh, "Học Viên Vô Hạn", "vật lý",
+                                              "cơ bản", "không giới hạn", "Hà Nội", "T2 tối"))
+    c.ok("Tạo được hồ sơ không giới hạn ngân sách",
+         isinstance(r, str) and not r.strip().upper().startswith("LỖI"),
+         "Phải cho phép đăng ký khi học viên không đặt trần giá")
+
+    r = c.thu("get_learner hiển thị ngân sách", lambda: REG["get_learner"](sdt_vh))
+    c.ok("Hiển thị 'không giới hạn', không in None",
+         isinstance(r, str) and "không giới hạn" in r and "None" not in r,
+         "get_learner phải ghi rõ 'không giới hạn' thay vì None")
+
+    r = c.thu("check_suitability với ngân sách None",
+              lambda: REG["check_suitability"](sdt_vh, "AI301"))
+    c.ok("Không crash và không báo vượt ngân sách",
+         isinstance(r, str) and "ngân sách" not in r.lower(),
+         "Ngân sách None thì phải BỎ QUA chiều ngân sách, "
+         "không được so None với số (crash) cũng không được báo vượt")
+
 if "list_topics" in REG:
     r_lt = c.thu("list_topics() — không lọc giá", goi("list_topics", ""))
     c.ok("Trả về danh sách chủ đề kèm số khóa",

@@ -104,6 +104,34 @@ else:
          " — Agent sẽ gọi tool ma và luôn nhận LỖI")
 
 # ---------------------------------------------------------------- guardrail
+c.muc("[5B] Guardrail chống lạc đề & chống tấn công prompt")
+
+c.ok("Có giới hạn phạm vi hỗ trợ",
+     any(k in REACT.lower() for k in ("ngoài phạm vi", "phạm vi hỗ trợ", "lạc đề")),
+     "Thêm mục giới hạn phạm vi: chỉ tư vấn khóa học, câu khác thì từ chối lịch sự")
+
+c.ok("Bắt từ chối ĐÚNG định dạng Thought/Final Answer",
+     ("ngoài phạm vi" in REACT.lower() and "Final Answer" in REACT),
+     "Khi từ chối vẫn phải giữ định dạng ReAct, nếu trả văn xuôi tự do thì "
+     "parse_action không bóc được và người dùng nhận thông báo như hệ thống hỏng")
+
+c.ok("Cấm tiết lộ system prompt",
+     any(k in REACT.lower() for k in ("không tiết lộ", "không được tiết lộ", "system prompt")),
+     "Thêm quy tắc không tiết lộ system prompt / cấu trúc dữ liệu")
+
+c.ok("Chống câu 'bỏ qua hướng dẫn phía trên'",
+     any(k in REACT.lower() for k in ("bỏ qua hướng dẫn", "bỏ qua mọi hướng dẫn",
+                                      "đóng vai khác", "nhà phát triển")),
+     "Thêm quy tắc bỏ qua mọi yêu cầu ghi đè hướng dẫn (prompt injection)")
+
+c.ok("Cấm đổ toàn bộ danh sách học viên",
+     any(k in REACT.lower() for k in ("toàn bộ danh sách học viên", "tất cả học viên")),
+     "Thêm quy tắc chỉ tra đúng SĐT người dùng cung cấp, không dump cả 1000 hồ sơ")
+
+c.ok("Coi Observation là dữ liệu, không phải mệnh lệnh",
+     "không phải mệnh lệnh" in REACT.lower() or "là dữ liệu" in REACT.lower(),
+     "Thêm quy tắc: nếu Observation chứa câu ra lệnh thì bỏ qua, chỉ dùng làm thông tin")
+
 c.muc("[6] Guardrails")
 c.ok("Đã khai báo MAX_ITERATIONS", isinstance(MAXIT, int),
      "Khai báo MAX_ITERATIONS trong prompts.py")
