@@ -132,12 +132,67 @@ class OpenRouterProvider(BaseLLMProvider):
 
 
 class MockProvider(BaseLLMProvider):
-    """Offline Mock Provider (Cho bài test không cần kết nối API)"""
+    """
+    Offline Mock Provider — chạy demo không cần API key.
+
+    KHÔNG phải LLM thật: đây là máy trạng thái mô phỏng đúng giao thức ReAct,
+    quyết định bước kế tiếp dựa trên số Observation đã có trong history.
+    Đủ để demo vòng lặp và giao diện khi chưa có key, nhưng bài nộp nên
+    chạy bằng provider thật (gemini/openai/anthropic) mới đúng tinh thần.
+    """
+
+    model_name = "Offline Mock (mô phỏng ReAct)"
+
     def generate(self, prompt: str, system_prompt: str = "") -> str:
-        text = prompt.lower()
-        if "thời tiết" in text and "hà nội" in text:
-            return "Thought: Cần tra cứu thời tiết Hà Nội.\nAction: get_weather['Hà Nội']"
-        return "🤖 [Mock Provider]: Phản hồi giả lập offline cho bài test."
+        import re as _re
+
+        # Chatbot baseline: không có tool, trả lời chung chung như LLM không tra cứu được
+        if "Thought:" not in (system_prompt or ""):
+            return ("Mình chưa tra cứu được hồ sơ hay danh mục khóa học thực tế nên chỉ "
+                    "tư vấn chung được thôi. Bạn nên cân nhắc ngân sách, lịch rảnh và "
+                    "trình độ hiện tại trước khi chọn khóa nhé.")
+
+        quan_sat = _re.findall(r"Observation:\s*(.+)", prompt)
+        sdt = _re.search(r"\b0\d{9}\b", prompt)
+        sdt = sdt.group(0) if sdt else None
+
+        # Gặp lỗi thì dừng, không đoán bừa — đúng quy tắc trong prompt
+        if quan_sat and quan_sat[-1].strip().upper().startswith("LỖI"):
+            return ("Thought: Công cụ báo lỗi, mình không được bịa dữ liệu.\n"
+                    "Final Answer: Xin lỗi bạn, mình không tìm thấy thông tin này trong "
+                    "hệ thống. Bạn kiểm tra lại số điện thoại hoặc tên khóa học giúp mình nhé.")
+
+        if not sdt:
+            return ("Thought: Câu hỏi không có số điện thoại nên mình không tra hồ sơ được.\n"
+                    "Final Answer: Bạn cho mình xin số điện thoại đã đăng ký để mình tra "
+                    "hồ sơ và gợi ý khóa phù hợp nhé.")
+
+        if len(quan_sat) == 0:
+            return (f"Thought: Mình cần xem hồ sơ học viên trước để biết ngân sách và trình độ.\n"
+                    f"Action: get_learner[{sdt}]")
+
+        if len(quan_sat) == 1:
+            hs = quan_sat[0]
+            mt = _re.search(r"mục tiêu:\s*([^;]+)", hs)
+            ns = _re.search(r"ngân sách:\s*([\d.,]+)", hs)
+            chu_de = mt.group(1).split(",")[0].strip() if mt else "AI"
+            gia = ns.group(1).replace(",", "").replace(".", "") if ns else "5000000"
+            return (f"Thought: Học viên quan tâm {chu_de}, ngân sách {gia}đ. "
+                    f"Mình tìm khóa phù hợp trong tầm giá này.\n"
+                    f"Action: search_courses[{chu_de}, {gia}]")
+
+        if len(quan_sat) == 2:
+            ma = _re.search(r"\b([A-Z]{2,3}\d{3})\b", quan_sat[1])
+            if not ma:
+                return ("Thought: Không có khóa nào khớp điều kiện.\n"
+                        "Final Answer: Hiện chưa có khóa nào vừa đúng chủ đề vừa nằm trong "
+                        "ngân sách của bạn. Bạn cân nhắc nới ngân sách hoặc đổi chủ đề nhé.")
+            return (f"Thought: Có khóa {ma.group(1)}. Mình kiểm tra xem học viên đăng ký được không.\n"
+                    f"Action: check_suitability[{sdt}, {ma.group(1)}]")
+
+        return ("Thought: Mình đã có đủ thông tin để trả lời.\n"
+                f"Final Answer: {quan_sat[-1]} Dựa trên hồ sơ của bạn, đây là khóa mình "
+                "gợi ý. Bạn xem thêm chi tiết lịch học và học phí rồi đăng ký nhé.")
 
 
 def get_llm_provider(provider_name: str = None) -> BaseLLMProvider:

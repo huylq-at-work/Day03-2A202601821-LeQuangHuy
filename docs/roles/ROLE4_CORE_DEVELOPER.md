@@ -129,6 +129,27 @@ Tham khảo [`src/ai_levels/level4_autonomous_agent.py`](../../src/ai_levels/lev
 
 ---
 
+## 🖥️ Giao diện web — dùng để trình chiếu Mốc 4
+
+```bash
+.venv\Scripts\python.exe src\web_ui.py
+```
+
+Mở `http://localhost:8765`. Hai cột cạnh nhau trên **cùng một câu hỏi**:
+
+| Cột trái | Cột phải |
+|---|---|
+| Chatbot thường (Cấp 2) | ReAct Agent (Cấp 3) |
+| Trả lời chung chung, không tra được gì | Hiện từng vòng: 💭 Thought · 🛠 Action · 👁 Observation · 🏁 Final Answer |
+
+Bấm sẵn được 5 test case của Role 1. Observation lỗi hiện màu đỏ, Guardrail hiện khung vàng.
+
+Dùng `http.server` có sẵn trong Python — **không cài thêm thư viện nào**, `requirements.txt` giữ nguyên.
+
+> 🔑 UI và CLI dùng chung hàm `react_steps()` trong `app.py`, nên logic không bao giờ lệch nhau. Sửa vòng lặp một chỗ là cả hai cùng đổi.
+
+---
+
 ## 🧪 Tự chấm & theo dõi cả nhóm
 
 Phần của bạn (29 mục):
