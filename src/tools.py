@@ -13,9 +13,12 @@ from typing import Optional
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DATABASE_PATH = os.path.join(_BASE, "config", "mock_database.json")
 
+# File JSON chỉ được đọc một lần khi module tools.py được import.
+# Sau bước này, các tool tra cứu dictionary trong RAM chứ không mở lại file.
 with open(_DATABASE_PATH, "r", encoding="utf-8") as database_file:
     _DB = json.load(database_file)
 
+# Tách từng "bảng" trong JSON thành biến toàn cục dùng chung cho các tool.
 LEARNERS = _DB["learners"]
 COURSES = _DB["courses"]
 PROVIDERS = _DB["providers"]
@@ -36,6 +39,12 @@ if os.path.exists(_HOC_VIEN_MOI_PATH):
 CAP_DO = _DB["_meta"]["cap_do"]
 NGAY_HIEN_TAI = _DB["_meta"]["ngay_hien_tai"]
 
+
+# ---------------------------------------------------------------------------
+# HÀM HỖ TRỢ NỘI BỘ
+# Các hàm bắt đầu bằng "_" không được đăng ký cho AI gọi trực tiếp.
+# Chúng chỉ chuẩn hóa dữ liệu hoặc dùng lại logic chung cho các tool bên dưới.
+# ---------------------------------------------------------------------------
 
 def _clean(value: object) -> str:
     """Chuẩn hóa tham số chuỗi do Agent truyền vào."""
@@ -121,8 +130,14 @@ def _buoi_cua(lich: str) -> str:
 
 
 def _certificate(value: bool) -> str:
+    """Đổi giá trị True/False thành câu mô tả chứng chỉ dễ đọc."""
     return "có chứng chỉ" if value else "không có chứng chỉ"
 
+
+# ---------------------------------------------------------------------------
+# TOOL ĐỌC HỒ SƠ HỌC VIÊN
+# AI truyền SĐT vào; Python tra LEARNERS trong RAM và chỉ trả đúng một hồ sơ.
+# ---------------------------------------------------------------------------
 
 def get_learner(sdt: str) -> str:
     """
@@ -139,14 +154,17 @@ def get_learner(sdt: str) -> str:
         str: Hồ sơ tóm tắt của học viên, hoặc chuỗi bắt đầu bằng ``LỖI:``
         nếu thiếu số điện thoại hay không tìm thấy học viên.
     """
+    # Chuẩn hóa SĐT trước khi dùng làm khóa tra dictionary.
     phone = _clean(sdt)
     if not phone:
         return "LỖI: Thiếu tham số số điện thoại."
 
+    # dict.get() trả None nếu SĐT không tồn tại, tránh phát sinh KeyError.
     learner = LEARNERS.get(phone)
     if learner is None:
         return f"LỖI: Không tìm thấy học viên có số điện thoại '{phone}'."
 
+    # Tool chỉ trả 5 nhóm ràng buộc cần thiết, không đưa toàn bộ DB cho AI.
     return (
         f"{learner['ho_ten']} — mục tiêu: {', '.join(learner['muc_tieu'])}; "
         f"trình độ: {learner['trinh_do']}; "
@@ -155,6 +173,11 @@ def get_learner(sdt: str) -> str:
         f"khu vực: {learner['khu_vuc']}."
     )
 
+
+# ---------------------------------------------------------------------------
+# TOOL TÌM KHÓA HỌC
+# Lọc danh sách COURSES bằng chủ đề và trần giá, sau đó trả tối đa 15 kết quả.
+# ---------------------------------------------------------------------------
 
 def search_courses(chu_de: str, gia_toi_da: int) -> str:
     """
@@ -172,6 +195,7 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
         str: Danh sách ngắn gồm mã, tên, giá, hình thức và trình độ.
         Không có khóa khớp là kết quả rỗng hợp lệ, không phải lỗi hệ thống.
     """
+    # Chuẩn hóa chủ đề và chuyển ngân sách từ chuỗi của AI sang số nguyên.
     topic = _clean(chu_de)
     if not topic:
         return "LỖI: Thiếu tham số chủ đề."
@@ -189,6 +213,8 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
     tim_tat_ca = topic_key in MO_HO
 
     matches = []
+    # Việc tìm kiếm diễn ra bằng Python trên dữ liệu trong RAM, không phải AI tự
+    # đọc file JSON. Mỗi khóa phải đúng chủ đề và không vượt trần giá.
     for code, course in COURSES.items():
         has_topic = tim_tat_ca or any(
             topic_key == _clean(course_topic).casefold()
@@ -219,6 +245,11 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
     ) + phan_du
 
 
+# ---------------------------------------------------------------------------
+# TOOL DUYỆT DANH MỤC CHỦ ĐỀ
+# Tổng hợp chủ đề từ tất cả khóa để xử lý câu hỏi mơ hồ như "có môn gì?".
+# ---------------------------------------------------------------------------
+
 def list_topics(gia_toi_da: str = "") -> str:
     """
     Liệt kê tất cả chủ đề đang có trong danh mục kèm số khóa và giá rẻ nhất.
@@ -236,6 +267,7 @@ def list_topics(gia_toi_da: str = "") -> str:
     tran, _ = _parse_ngan_sach(gia_toi_da)
 
     thong_ke = {}
+    # Một khóa có thể thuộc nhiều chủ đề; mỗi chủ đề lưu [số khóa, giá rẻ nhất].
     for course in COURSES.values():
         if tran is not None and course["gia"] > tran:
             continue
@@ -256,6 +288,11 @@ def list_topics(gia_toi_da: str = "") -> str:
     return dau + ":\n" + "\n".join(dong)
 
 
+# ---------------------------------------------------------------------------
+# TOOL XEM CHI TIẾT KHÓA
+# Tìm một mã khóa và định dạng dữ liệu khác nhau cho online/offline.
+# ---------------------------------------------------------------------------
+
 def get_course_detail(ma_khoa: str) -> str:
     """
     Lấy thông tin chi tiết của một khóa học.
@@ -272,6 +309,7 @@ def get_course_detail(ma_khoa: str) -> str:
         str: Chi tiết đầy đủ của khóa học, hoặc chuỗi bắt đầu bằng ``LỖI:``
         nếu thiếu mã hay mã khóa không tồn tại.
     """
+    # _course() chuẩn hóa mã thành chữ hoa rồi tra COURSES trong RAM.
     code, course = _course(ma_khoa)
     if not code:
         return "LỖI: Thiếu tham số mã khóa học."
@@ -284,6 +322,8 @@ def get_course_detail(ma_khoa: str) -> str:
         f"trình độ {course['trinh_do_yeu_cau']}."
     )
 
+    # Khóa online không có lịch cố định, địa điểm, sĩ số và hạn đăng ký.
+    # Tách nhánh để không trả các giá trị None/null cho AI.
     if course["hinh_thuc"] == "online":
         schedule_line = (
             "Lịch: tự học; địa điểm: học trực tuyến. "
@@ -291,6 +331,7 @@ def get_course_detail(ma_khoa: str) -> str:
         )
         opening = "Khai giảng: tự học bất kỳ lúc nào."
     else:
+        # Khóa offline có sĩ số hữu hạn nên cần tính số chỗ còn lại.
         remaining = max(course["si_so"] - course["da_dang_ky"], 0)
         schedule_line = (
             f"Lịch: {', '.join(course['lich_hoc'])} tại {course['dia_diem']}.\n"
@@ -306,6 +347,12 @@ def get_course_detail(ma_khoa: str) -> str:
     )
     return f"{first_line}\n{schedule_line}\n{metadata}"
 
+
+# ---------------------------------------------------------------------------
+# TOOL KIỂM TRA ĐỘ PHÙ HỢP
+# Đây là logic nghiệp vụ cứng: Python kiểm tra mọi điều kiện và liệt kê lý do.
+# AI chỉ nhận kết quả "Phù hợp" hoặc "Không phù hợp", không tự tính thay.
+# ---------------------------------------------------------------------------
 
 def check_suitability(sdt: str, ma_khoa: str) -> str:
     """
@@ -324,6 +371,7 @@ def check_suitability(sdt: str, ma_khoa: str) -> str:
         str: ``Phù hợp.`` hoặc ``Không phù hợp. Lý do: ...`` với toàn bộ
         lý do cụ thể. Dữ liệu đầu vào không tồn tại trả chuỗi ``LỖI:``.
     """
+    # Tool cần đồng thời một hồ sơ học viên và một khóa học hợp lệ.
     phone = _clean(sdt)
     code, course = _course(ma_khoa)
     if not phone or not code:
@@ -337,13 +385,16 @@ def check_suitability(sdt: str, ma_khoa: str) -> str:
 
     reasons = []
 
-    # ngan_sach = None nghĩa là học viên không đặt trần giá -> bỏ qua chiều này
+    # Chiều 1 - ngân sách:
+    # ngan_sach = None nghĩa là học viên không đặt trần giá -> bỏ qua chiều này.
     if learner["ngan_sach"] is not None and course["gia"] > learner["ngan_sach"]:
         reasons.append(
             "vượt ngân sách "
             f"({course['gia']:,} > {learner['ngan_sach']:,})"
         )
 
+    # Chiều 2 - trình độ:
+    # So sánh vị trí trong CAP_DO thay vì so sánh chuỗi trực tiếp.
     try:
         learner_level = CAP_DO.index(learner["trinh_do"])
         course_level = CAP_DO.index(course["trinh_do_yeu_cau"])
@@ -356,7 +407,10 @@ def check_suitability(sdt: str, ma_khoa: str) -> str:
             f"({learner['trinh_do']} < {course['trinh_do_yeu_cau']})"
         )
 
+    # Chiều 3, 4, 5 chỉ áp dụng cho lớp offline.
+    # Khóa online tự học nên bỏ qua lịch, khu vực, chỗ và hạn đăng ký.
     if course["hinh_thuc"] == "offline":
+        # Chiều 3 - lịch: đổi giờ cụ thể thành buổi rồi so với lịch rảnh.
         try:
             required_sessions = [_buoi_cua(item) for item in course["lich_hoc"]]
         except (AttributeError, IndexError, TypeError, ValueError):
@@ -372,28 +426,37 @@ def check_suitability(sdt: str, ma_khoa: str) -> str:
                 f"lịch không khớp ({', '.join(unavailable_sessions)})"
             )
 
+        # Chiều 4 - khu vực: địa điểm lớp phải trùng khu vực học viên.
         if course["dia_diem"] != learner["khu_vuc"]:
             reasons.append(
                 "khác khu vực "
                 f"({course['dia_diem']} != {learner['khu_vuc']})"
             )
 
+        # Chiều 5a - chỗ trống: số đã đăng ký phải nhỏ hơn sĩ số.
         if course["da_dang_ky"] >= course["si_so"]:
             reasons.append(
                 "lớp đã đầy "
                 f"({course['da_dang_ky']}/{course['si_so']})"
             )
 
+        # Chiều 5b - hạn đăng ký: dùng ngày cố định trong mock database.
         if course["han_dang_ky"] < NGAY_HIEN_TAI:
             reasons.append(
                 "hết hạn đăng ký "
                 f"({course['han_dang_ky']} < {NGAY_HIEN_TAI})"
             )
 
+    # Không có lý do loại nào nghĩa là học viên đáp ứng toàn bộ điều kiện.
     if not reasons:
         return "Phù hợp."
     return f"Không phù hợp. Lý do: {'; '.join(reasons)}."
 
+
+# ---------------------------------------------------------------------------
+# TOOL TRA NHÀ CUNG CẤP
+# Nhận mã NCC lấy từ chi tiết khóa và tra bảng PROVIDERS trong RAM.
+# ---------------------------------------------------------------------------
 
 def get_provider(ma_ncc: str) -> str:
     """
@@ -420,6 +483,11 @@ def get_provider(ma_ncc: str) -> str:
         f"{provider['khu_vuc']}, đánh giá {provider['danh_gia']}/5."
     )
 
+
+# ---------------------------------------------------------------------------
+# TOOL SO SÁNH KHÓA
+# Tra hai mã độc lập rồi đưa các thuộc tính chính về cùng một định dạng.
+# ---------------------------------------------------------------------------
 
 def compare_courses(ma1: str, ma2: str) -> str:
     """
@@ -457,7 +525,12 @@ def compare_courses(ma1: str, ma2: str) -> str:
     return f"{summary(code1, course1)}\n{summary(code2, course2)}"
 
 
-# Registry duy nhất để app.py gọi tool theo tên do Agent sinh ra.
+# ---------------------------------------------------------------------------
+# TOOL GHI HỒ SƠ HỌC VIÊN MỚI
+# Khác các tool trên, hàm này có thay đổi trạng thái: cập nhật RAM và ghi vào
+# hoc_vien_moi.json, nhưng vẫn giữ nguyên mock_database.json ban đầu.
+# ---------------------------------------------------------------------------
+
 def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
                      ngan_sach: str, khu_vuc: str, lich_ranh: str) -> str:
     """
@@ -479,6 +552,7 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
     Returns:
         str: Xác nhận đã tạo hồ sơ, hoặc chuỗi báo lỗi nếu dữ liệu không hợp lệ.
     """
+    # Kiểm tra định dạng và tính duy nhất của SĐT trước khi tạo hồ sơ.
     sdt = _clean(sdt)
     if not (sdt.isdigit() and len(sdt) == 10 and sdt.startswith("0")):
         return (f"LỖI: Số điện thoại '{sdt}' không hợp lệ. "
@@ -502,6 +576,7 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
         return (f"LỖI: Ngân sách '{ngan_sach}' không hợp lệ. Cần là số tiền dương, "
                 "hoặc ghi 'không giới hạn' nếu học viên không đặt trần giá.")
 
+    # AI truyền danh sách mục tiêu/lịch bằng dấu "|"; vẫn hỗ trợ dấu phẩy.
     def _tach(chuoi):
         return [x.strip() for x in _clean(chuoi).replace(",", "|").split("|") if x.strip()]
 
@@ -523,8 +598,10 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
         "da_hoc": [],
     }
 
+    # Cập nhật RAM trước để các tool khác dùng được hồ sơ ngay trong phiên chạy.
     LEARNERS[sdt] = ho_so
     try:
+        # Ghi riêng học viên mới để lần khởi động sau có thể nạp lại.
         moi = {}
         if os.path.exists(_HOC_VIEN_MOI_PATH):
             with open(_HOC_VIEN_MOI_PATH, "r", encoding="utf-8") as f:
@@ -533,6 +610,7 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
         with open(_HOC_VIEN_MOI_PATH, "w", encoding="utf-8") as f:
             json.dump(moi, f, ensure_ascii=False, indent=2)
     except Exception as e:
+        # Nếu ghi file thất bại, hoàn tác thay đổi RAM để dữ liệu nhất quán.
         del LEARNERS[sdt]
         return f"LỖI: Không lưu được hồ sơ ({e}). Vui lòng thử lại."
 
@@ -541,6 +619,13 @@ def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
             f"ngân sách: {_mo_ta_ngan_sach(tien)}; rảnh: {', '.join(ds_lich)}; "
             f"khu vực: {ho_so['khu_vuc']}. Giờ có thể tìm khóa phù hợp cho học viên này.")
 
+
+# ---------------------------------------------------------------------------
+# TOOL REGISTRY
+# app.py lấy tên Action do AI sinh ra, tìm hàm tương ứng trong dictionary này
+# rồi gọi hàm với các tham số đã parse. Hàm không có trong registry thì AI
+# không thể gọi qua vòng lặp ReAct.
+# ---------------------------------------------------------------------------
 
 AVAILABLE_TOOLS = {
     "get_learner": get_learner,
