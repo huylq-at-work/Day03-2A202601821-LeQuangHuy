@@ -34,10 +34,12 @@ PAGE = r"""<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Trợ Lý Đăng Ký Khóa Học</title>
 <style>
-:root{--bg:#ffffff;--bg2:#f7f6f4;--line:#e6e3dd;--tx:#1f1e1c;--mu:#78746c;
-      --ac:#5b4ac4;--ok:#0f6e56;--er:#a32d2d;--wa:#854f0b;--tl:#185fa5;--bub:#f0eeea}
-@media(prefers-color-scheme:dark){:root{--bg:#1b1a18;--bg2:#232120;--line:#38352f;
-      --tx:#ece9e4;--mu:#a09b93;--ac:#a79ae8;--ok:#5dcaa5;--er:#f09595;--wa:#efa532;--tl:#85b7eb;--bub:#2c2a27}}
+:root{--bg:#ffffff;--bg2:#f7f7f4;--line:#e7e4de;--tx:#1a1917;--mu:#767168;
+      --ac:#5b4ac4;--ok:#0f6e56;--er:#a32d2d;--wa:#8a5209;--tl:#185fa5;--bub:#f1efeb;
+      --sh:0 1px 2px rgba(0,0,0,.05)}
+:root[data-theme="dark"]{--bg:#1b1a18;--bg2:#232120;--line:#38352f;
+      --tx:#ece9e4;--mu:#a09b93;--ac:#a79ae8;--ok:#5dcaa5;--er:#f09595;--wa:#efa532;
+      --tl:#85b7eb;--bub:#2c2a27;--sh:0 1px 2px rgba(0,0,0,.3)}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--tx);
@@ -50,10 +52,13 @@ header{border-bottom:1px solid var(--line);padding:11px 18px;display:flex;
 .seg{display:flex;border:1px solid var(--line);border-radius:99px;padding:2px;background:var(--bg2)}
 .seg button{border:0;background:none;color:var(--mu);font:inherit;font-size:13px;
             padding:5px 14px;border-radius:99px;cursor:pointer}
-.seg button.on{background:var(--bg);color:var(--tx);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.seg button.on{background:var(--bg);color:var(--tx);font-weight:500;box-shadow:var(--sh)}
 .spacer{flex:1}
 .badge{font-size:12px;color:var(--mu);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
 .badge.warn{color:var(--wa);border-color:var(--wa)}
+.icobtn{border:1px solid var(--line);background:var(--bg);border-radius:99px;width:30px;height:30px;
+        font-size:14px;cursor:pointer;color:var(--mu);line-height:1;padding:0}
+.icobtn:hover{color:var(--tx);border-color:var(--mu)}
 
 main{flex:1;overflow-y:auto}
 .thread{max-width:760px;margin:0 auto;padding:26px 18px 10px}
@@ -121,7 +126,14 @@ footer{border-top:1px solid var(--line);background:var(--bg);padding:13px 18px 1
   <span class="spacer"></span>
   <span class="badge" id="bd-prov"></span>
   <button class="badge" id="clear" style="cursor:pointer;background:none;font:inherit">Xóa hội thoại</button>
+  <button class="icobtn" id="theme" title="Đổi giao diện sáng/tối">🌙</button>
 </header>
+<script>
+(function(){
+  const t = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
 
 <main><div class="thread" id="thread"></div></main>
 
@@ -231,6 +243,15 @@ ta.addEventListener("keydown", e=>{
 });
 $("go").onclick = ()=>{ const v=ta.value; ta.value=""; ta.style.height="auto"; hoi(v); };
 $("clear").onclick = ()=>{ msgs=[]; render(); };
+
+function apDungTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  localStorage.setItem("theme", t);
+  $("theme").textContent = t === "dark" ? "☀️" : "🌙";
+}
+apDungTheme(localStorage.getItem("theme") || "light");
+$("theme").onclick = ()=>
+  apDungTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
 $("m-agent").onclick = ()=>{ mode="agent"; $("m-agent").className="on"; $("m-bot").className=""; };
 $("m-bot").onclick = ()=>{ mode="bot"; $("m-bot").className="on"; $("m-agent").className=""; };
 </script>
