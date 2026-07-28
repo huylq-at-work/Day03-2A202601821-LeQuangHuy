@@ -81,7 +81,11 @@ if not REG:
     c.bo_qua("So khớp tên tool", "Role 2 chưa xong tools.py, chưa kiểm được")
 else:
     TOOL_LOI = ["get_learner", "search_courses", "get_course_detail", "check_suitability"]
-    trong_prompt = set(re.findall(r"\b([a-z_]{4,})\s*\[", REACT))
+    # Tên giữ chỗ trong câu hướng dẫn cú pháp, không phải tool thật
+    GIU_CHO = {"ten_tool", "tool_name", "ten_cong_cu", "tencongcu", "ten_ham",
+               "tool", "action", "ten"}
+    trong_prompt = {t for t in re.findall(r"\b([a-z_]{4,})\s*\[", REACT)
+                    if t not in GIU_CHO}
 
     thieu_loi = [t for t in TOOL_LOI if t in REG and t not in trong_prompt]
     c.ok("Prompt liệt kê đủ 4 tool lõi", not thieu_loi,
