@@ -107,6 +107,44 @@ c.ok("Có ghi lại câu trả lời của Chatbot baseline để so sánh",
      "aseline" in noi or "hatbot" in noi,
      "Ghi lại Chatbot baseline trả lời gì — đây là bằng chứng so sánh quan trọng nhất")
 
+# --- Chống trace chép tay: bản mẫu cũng chứa đủ Thought/Action/Observation ---
+c.muc("[5B] Trace phải là output THẬT, không phải bản mẫu chép tay")
+
+con_placeholder = [x for x in ("Chờ Role 4", "Ghi lại câu trả lời", "dán log", "(...)")
+                   if x in noi]
+c.ok("Không còn placeholder chưa xóa", not con_placeholder,
+     f"Còn placeholder trong trace_eval.md: {', '.join(con_placeholder)}")
+
+phan_trace = noi.split("## 2.")[-1]
+dong_cat = [d.strip() for d in phan_trace.splitlines()
+            if d.rstrip().endswith(("...", "…")) and d.strip()]
+c.ok("Trace không bị cắt giữa chừng bằng '...'", not dong_cat,
+     f"Có {len(dong_cat)} dòng kết thúc bằng '...' (vd: {dong_cat[0][:60] if dong_cat else ''}) "
+     "— dán nguyên văn output, đừng rút gọn")
+
+# Observation của get_learner có định dạng cố định do tools.py sinh ra.
+# Chép tay gần như chắc chắn sai dấu câu này.
+co_obs_learner = "mục tiêu:" in noi and "trình độ:" in noi and "ngân sách:" in noi
+c.ok("Observation khớp đúng định dạng tools.py sinh ra", co_obs_learner,
+     "Observation của get_learner phải là 'mục tiêu: X; trình độ: Y; ngân sách: Z; ...' "
+     "(có dấu hai chấm). Sai dấu câu nghĩa là trace được chép tay chứ không phải chạy thật")
+
+so_trace = noi.count("Action:")
+c.ok(f"Có trace cho nhiều test case (đang có {so_trace} lượt gọi Action)", so_trace >= 4,
+     f"Mới có {so_trace} lượt Action. Chạy scripts/gen_trace_eval.py để sinh trace "
+     "thật cho cả 5 test case")
+
+c.ok("Có ghi rõ chạy trên provider nào",
+     any(k in noi for k in ("OpenAIProvider", "GeminiProvider", "AnthropicProvider",
+                            "OpenRouterProvider")),
+     "Ghi rõ trace chạy trên LLM nào. Nếu là MockProvider thì đó là trace giả lập, "
+     "không dùng để nộp bài")
+
+c.ok("Chatbot baseline có nội dung thật, không phải mô tả",
+     noi.count(">") >= 5,
+     "Phần Chatbot baseline phải là câu trả lời thật của LLM, không phải câu mô tả "
+     "'chắc chắn Chatbot sẽ trả lời chung chung'")
+
 # ---------------------------------------------------------------- flowchart
 c.muc("[6] Hybrid Flowchart")
 
