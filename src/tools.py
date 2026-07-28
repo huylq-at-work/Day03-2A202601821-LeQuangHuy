@@ -179,7 +179,24 @@ def get_learner(sdt: str) -> str:
 # Lọc danh sách COURSES bằng chủ đề và trần giá, sau đó trả tối đa 15 kết quả.
 # ---------------------------------------------------------------------------
 
-def search_courses(chu_de: str, gia_toi_da: int) -> str:
+def _chuan_hoa_hinh_thuc(value: object) -> str:
+    """
+    Doc tham so hinh thuc hoc. Tra "online", "offline", hoac "" (khong loc).
+
+    Chap nhan cach nguoi dung hay noi: "truc tuyen", "tu hoc", "tai trung tam"...
+    """
+    v = _clean(value).casefold()
+    if not v:
+        return ""
+    if any(k in v for k in ("online", "trực tuyến", "truc tuyen", "tự học", "tu hoc", "từ xa")):
+        return "online"
+    if any(k in v for k in ("offline", "trực tiếp", "truc tiep", "tại lớp", "trung tâm",
+                            "tại chỗ", "on-site")):
+        return "offline"
+    return ""
+
+
+def search_courses(chu_de: str, gia_toi_da: int, hinh_thuc: str = "") -> str:
     """
     Tìm các khóa có chủ đề khớp và giá không vượt quá ngân sách.
 
@@ -190,6 +207,9 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
     Args:
         chu_de (str): Chủ đề cần học, ví dụ ``AI`` hoặc ``dữ liệu``.
         gia_toi_da (int): Mức giá tối đa bằng VNĐ, ví dụ ``2000000``.
+            Để trống nếu học viên không giới hạn ngân sách.
+        hinh_thuc (str): ``online`` hoặc ``offline``. Để trống là lấy cả hai.
+            Dùng ``online`` khi học viên ở xa hoặc ngoài vùng có trung tâm.
 
     Returns:
         str: Danh sách ngắn gồm mã, tên, giá, hình thức và trình độ.
@@ -211,6 +231,7 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
              "bất kỳ", "gì cũng được", "all", "any", "*"}
     topic_key = topic.casefold()
     tim_tat_ca = topic_key in MO_HO
+    loc_ht = _chuan_hoa_hinh_thuc(hinh_thuc)
 
     matches = []
     # Việc tìm kiếm diễn ra bằng Python trên dữ liệu trong RAM, không phải AI tự
@@ -220,12 +241,14 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
             topic_key == _clean(course_topic).casefold()
             for course_topic in course["chu_de"]
         )
-        if has_topic and (max_price is None or course["gia"] <= max_price):
+        hop_hinh_thuc = not loc_ht or course["hinh_thuc"] == loc_ht
+        if has_topic and hop_hinh_thuc and (max_price is None or course["gia"] <= max_price):
             matches.append((course["gia"], code, course))
 
     if not matches:
         gioi_han = "" if max_price is None else f" dưới {_money(max_price)}"
-        return f"Không tìm thấy khóa học nào về '{topic}'{gioi_han}."
+        them = f" theo hình thức {loc_ht}" if loc_ht else ""
+        return f"Không tìm thấy khóa học nào về '{topic}'{gioi_han}{them}."
 
     matches.sort(key=lambda item: (item[0], item[1]))
 
@@ -250,7 +273,7 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
 # Tổng hợp chủ đề từ tất cả khóa để xử lý câu hỏi mơ hồ như "có môn gì?".
 # ---------------------------------------------------------------------------
 
-def list_topics(gia_toi_da: str = "") -> str:
+def list_topics(gia_toi_da: str = "", hinh_thuc: str = "") -> str:
     """
     Liệt kê tất cả chủ đề đang có trong danh mục kèm số khóa và giá rẻ nhất.
 
@@ -260,16 +283,21 @@ def list_topics(gia_toi_da: str = "") -> str:
 
     Args:
         gia_toi_da (str): Trần giá lọc theo, để trống nghĩa là không lọc.
+        hinh_thuc (str): ``online`` hoặc ``offline``. Để trống là lấy cả hai.
+            Dùng ``online`` khi học viên ở xa hoặc ngoài vùng có trung tâm.
 
     Returns:
         str: Danh sách chủ đề, mỗi dòng gồm tên chủ đề, số khóa và giá thấp nhất.
     """
     tran, _ = _parse_ngan_sach(gia_toi_da)
+    loc_ht = _chuan_hoa_hinh_thuc(hinh_thuc)
 
     thong_ke = {}
     # Một khóa có thể thuộc nhiều chủ đề; mỗi chủ đề lưu [số khóa, giá rẻ nhất].
     for course in COURSES.values():
         if tran is not None and course["gia"] > tran:
+            continue
+        if loc_ht and course["hinh_thuc"] != loc_ht:
             continue
         for cd in course["chu_de"]:
             cd = _clean(cd)
@@ -278,13 +306,21 @@ def list_topics(gia_toi_da: str = "") -> str:
             thong_ke[cd][0] += 1
             thong_ke[cd][1] = min(thong_ke[cd][1], course["gia"])
 
+    dieu_kien = []
+    if tran is not None:
+        dieu_kien.append(f"dưới {_money(tran)}")
+    if loc_ht:
+        dieu_kien.append(f"hình thức {loc_ht}")
+    mo_ta = " ".join(dieu_kien)
+
     if not thong_ke:
-        return f"Không có chủ đề nào có khóa dưới {_money(tran)}."
+        return f"Không có chủ đề nào có khóa {mo_ta or 'phù hợp'}."
 
     dong = [f"{cd}: {so} khóa, từ {_money(gia)}"
             for cd, (so, gia) in sorted(thong_ke.items(), key=lambda x: -x[1][0])]
+    so_khoa = sum(1 for c in COURSES.values() if not loc_ht or c["hinh_thuc"] == loc_ht)
     dau = f"Có {len(thong_ke)} chủ đề"
-    dau += f" với khóa dưới {_money(tran)}" if tran is not None else f" trong {len(COURSES)} khóa"
+    dau += f" với khóa {mo_ta}" if mo_ta else f" trong {so_khoa} khóa"
     return dau + ":\n" + "\n".join(dong)
 
 

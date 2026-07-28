@@ -6,6 +6,8 @@ Kiểm: src/tools.py — có đủ tool chưa, docstring chuẩn chưa, có cras
 Chạy:.venv\\Scripts\\python.exe tests\\test_role2.py
 """
 
+import json
+import os
 import sys
 
 from _harness import Check, nap_database
@@ -118,6 +120,28 @@ if "search_courses" in REG:
          isinstance(r_dai, str) and (r_dai.count("\n") <= 16),
          "128 khóa mà đổ hết ra thì Observation quá dài, phải giới hạn và ghi rõ còn bao nhiêu")
 
+# Cac muc duoi day co GHI du lieu that. Don so du tu lan chay truoc de test
+# chay lai bao nhieu lan cung ra ket qua giong nhau.
+SDT_THU_NGHIEM = ["0900000199", "0900000288", "0977111222", "0955111222"]
+
+
+def don_du_lieu_thu():
+    from _harness import duong_dan as _dd
+    p_moi = _dd("config", "hoc_vien_moi.json")
+    try:
+        moi = json.load(open(p_moi, encoding="utf-8")) if os.path.exists(p_moi) else {}
+    except Exception:
+        moi = {}
+    for s in SDT_THU_NGHIEM:
+        moi.pop(s, None)
+        if tools and hasattr(tools, "LEARNERS"):
+            tools.LEARNERS.pop(s, None)
+    with open(p_moi, "w", encoding="utf-8") as fh:
+        json.dump(moi, fh, ensure_ascii=False, indent=2)
+
+
+don_du_lieu_thu()
+
 c.muc("[5B] Ngân sách không giới hạn")
 
 if "search_courses" in REG:
@@ -154,6 +178,44 @@ if "dang_ky_hoc_vien" in REG and "check_suitability" in REG and "get_learner" in
          isinstance(r, str) and "ngân sách" not in r.lower(),
          "Ngân sách None thì phải BỎ QUA chiều ngân sách, "
          "không được so None với số (crash) cũng không được báo vượt")
+
+c.muc("[5C] Lọc theo hình thức online/offline")
+
+if "search_courses" in REG:
+    f_sc = REG["search_courses"]
+
+    r2 = c.thu("search_courses 2 tham số vẫn chạy (tương thích ngược)",
+               lambda: f_sc("vật lý", ""))
+    c.ok("Không vỡ khi thiếu tham số hình thức",
+         isinstance(r2, str) and not r2.strip().upper().startswith("LỖI"),
+         "Thêm tham số thứ 3 không được làm hỏng lời gọi 2 tham số cũ")
+
+    r_on = c.thu("search_courses(..., 'online')", lambda: f_sc("vật lý", "", "online"))
+    c.ok("Lọc online chỉ trả khóa online",
+         isinstance(r_on, str) and "offline" not in r_on,
+         "Lọc 'online' mà kết quả còn khóa offline — người ở xa không học được")
+
+    r_off = c.thu("search_courses(..., 'offline')", lambda: f_sc("vật lý", "", "offline"))
+    c.ok("Lọc offline chỉ trả khóa offline",
+         isinstance(r_off, str) and "- online -" not in r_off,
+         "Lọc 'offline' mà kết quả còn khóa online")
+
+    r_vn = c.thu("Hiểu cách nói tiếng Việt ('trực tuyến')",
+                 lambda: f_sc("vật lý", "", "trực tuyến"))
+    c.ok("'trực tuyến' hiểu là online",
+         isinstance(r_vn, str) and "offline" not in r_vn,
+         "Người dùng hay nói 'trực tuyến' thay vì 'online'")
+
+    r_la = c.thu("Hình thức vô nghĩa -> không lọc", lambda: f_sc("vật lý", "", "abcxyz"))
+    c.ok("Giá trị lạ thì bỏ qua bộ lọc, không trả LỖI",
+         isinstance(r_la, str) and not r_la.strip().upper().startswith("LỖI"),
+         "Hình thức không nhận diện được thì coi như không lọc, đừng chặn cả câu tra cứu")
+
+if "list_topics" in REG:
+    r_lt_on = c.thu("list_topics(hình thức online)", lambda: REG["list_topics"]("", "online"))
+    c.ok("list_topics lọc được theo hình thức",
+         isinstance(r_lt_on, str) and "online" in r_lt_on,
+         "list_topics phải nhận tham số hình thức để dùng cho học viên ở xa")
 
 if "list_topics" in REG:
     r_lt = c.thu("list_topics() — không lọc giá", goi("list_topics", ""))

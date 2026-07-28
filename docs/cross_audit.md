@@ -234,8 +234,22 @@ Nguyên nhân nằm ở thiết kế tool chứ không phải ở prompt: `searc
 chỉ lọc được theo chủ đề và giá, **không có tham số lọc theo hình thức online/offline**.
 Khu vực chỉ được kiểm tra ở `check_suitability`, tức là sau khi đã trót gợi ý khóa rồi.
 
-Hướng sửa: thêm tham số `hinh_thuc` cho `search_courses`, và cho `get_learner` trả về
-`khu_vuc` sớm để Agent tự biết loại khóa offline khi học viên ở ngoài vùng phủ.
+### 5.2b. Đã vá
+
+Thêm tham số thứ 3 `hinh_thuc` cho `search_courses` và `list_topics` (`online` / `offline` /
+để trống là cả hai), kèm mục 1B2 trong system prompt: lớp offline chỉ có ở Hà Nội và TP.HCM,
+học viên ở nơi khác thì bắt buộc lọc online và phải nói rõ lý do cho họ.
+
+Chạy lại sau khi vá:
+
+| Câu hỏi | Agent gọi | Kết quả |
+| :-- | :-- | :-- |
+| "Tôi ở Mỹ, muốn tìm môn học" | `list_topics[, online]` | Chỉ liệt kê chủ đề có khóa online |
+| "Em ở Đà Nẵng, muốn học tiếng Anh dưới 2 triệu" | `search_courses[tiếng Anh, 2000000, online]` | 2 khóa online, không gợi ý lớp ở Hà Nội |
+| "Em là 0912345203..." (học viên Hà Nội) | `search_courses[AI, 2000000]` | Không lọc thừa, giữ nguyên hành vi cũ |
+
+Tham số mới không bắt buộc nên mọi lời gọi 2 tham số cũ vẫn chạy — có test riêng cho
+tính tương thích ngược.
 
 ### 5.3. Tổng kết
 
