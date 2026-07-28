@@ -17,6 +17,8 @@ Bạn viết **lời chỉ dẫn cho LLM** và lắp **phanh an toàn**.
 
 Đây là vai then chốt: nếu prompt không ép được LLM sinh đúng định dạng `Thought / Action`, code của Role 4 **không đọc ra tên tool** → cả vòng lặp ReAct sập. Prompt của bạn là hợp đồng giữa LLM và code.
 
+> 📖 **Đọc trước khi viết prompt**: [SCHEMA_FOR_PROMPT.md](../SCHEMA_FOR_PROMPT.md) — bản rút gọn 7 KB gồm từ vựng dữ liệu hợp lệ, đủ 13 mã khóa học, và **hình dạng Observation thật** mà mỗi tool trả về. Ví dụ few-shot trong prompt phải khớp với những chuỗi đó, nếu không LLM sẽ học sai định dạng.
+
 ---
 
 ## 📍 MỐC 1 (20 phút) — Liệt kê Failure Modes
@@ -137,6 +139,25 @@ Khi Role 4 đã có app chạy, test nhanh bằng:
 ```bash
 .venv\Scripts\python.exe src\app.py 3
 ```
+
+---
+
+## 🧪 Tự chấm — chạy bất cứ lúc nào
+
+```bash
+.venv\Scripts\python.exe tests\test_role3.py
+```
+
+Test này chấm 17 mục và in ra **chính xác còn phải sửa gì**. Quan trọng nhất, nó bắt được lỗi mà mắt thường rất khó thấy:
+
+> **So từng tên tool trong prompt của bạn với `AVAILABLE_TOOLS` của Role 2.**
+> Lệch một chữ (`get_learner` vs `get_hoc_vien`) là Agent gọi tool ma, luôn nhận `LỖI:`, và lặp tới khi chạm Guardrail. Nhìn code thì thấy cả hai đều "đúng", chỉ có test mới bắt được.
+
+Ngoài ra nó kiểm: prompt đủ 4 phần chưa, có ví dụ few-shot kèm `Observation` chưa, có quy tắc cấm bịa chưa, `MAX_ITERATIONS` có nằm trong khoảng 5–8 không.
+
+Chạy tới khi thấy `COVERAGE: 17/17` là xong phần bạn.
+
+> ℹ️ Mục so khớp tên tool sẽ hiện `[-]` (bỏ qua) cho tới khi Role 2 làm xong `tools.py`. Nhớ chạy lại sau khi Hướng push code.
 
 ---
 

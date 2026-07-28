@@ -129,6 +129,35 @@ Tham khảo [`src/ai_levels/level4_autonomous_agent.py`](../../src/ai_levels/lev
 
 ---
 
+## 🧪 Tự chấm & theo dõi cả nhóm
+
+Phần của bạn (29 mục):
+
+```bash
+.venv\Scripts\python.exe tests\test_role4.py
+```
+
+Bảng điều khiển cả nhóm — dành riêng cho vai Integrator:
+
+```bash
+.venv\Scripts\python.exe tests\run_all.py
+```
+
+Chạy cả 4 bộ test, in coverage từng người và danh sách việc còn thiếu. Dùng nó để biết ai đang tắc mà không cần đi hỏi từng bạn:
+
+```
+  Vai trò         File giữ                        Coverage
+  ----------------------------------------------------------
+  Role 1  Đạt     test_cases.json + docs    #######... 14/20  70%
+  Role 2  Hướng   src/tools.py              #.........  2/18  11%
+  Role 3  Liên    src/prompts.py            ######.... 11/17  65%
+  Role 4  Huy     src/app.py                #########. 27/29  93%
+```
+
+Test của bạn kiểm cả một thứ dễ vỡ về sau: `app.py` **không được** `from tools import get_learner`. Chỉ import `AVAILABLE_TOOLS` thôi, không thì Role 2 đổi tên hàm là app crash.
+
+---
+
 ## ✅ Checklist
 
 - [x] Vòng lặp ReAct thật (`parse_action` + `history` + guardrail)

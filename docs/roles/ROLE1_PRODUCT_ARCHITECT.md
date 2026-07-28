@@ -147,6 +147,24 @@ flowchart TD
 
 ---
 
+## 🧪 Tự chấm — chạy bất cứ lúc nào
+
+```bash
+.venv\Scripts\python.exe tests\test_role1.py
+```
+
+Test này chấm 20 mục và in ra **chính xác còn phải sửa gì**. Nó kiểm cả những thứ dễ sót:
+
+- Số điện thoại bạn viết trong test case có **thật** trong database không (sai một số là Agent trả `LỖI:` và bạn tưởng Agent hỏng)
+- Mã khóa học có tồn tại không
+- Câu bẫy có thật sự dùng dữ liệu không tồn tại không
+- Còn sót từ ngữ của đề tài cũ (trường đại học) không
+- `trace_eval.md` đã có đủ Scoring Matrix + trace có `Final Answer` chưa
+
+Chạy tới khi thấy `COVERAGE: 20/20` là xong phần bạn.
+
+---
+
 ## ✅ Checklist
 
 - [ ] Mốc 1: Scoring Matrix 4 tiêu chí

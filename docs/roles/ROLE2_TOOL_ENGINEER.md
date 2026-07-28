@@ -183,6 +183,24 @@ Tool của bạn phải ra đúng 6 dòng này.
 
 ---
 
+## 🧪 Tự chấm — chạy bất cứ lúc nào
+
+```bash
+.venv\Scripts\python.exe tests\test_role2.py
+```
+
+Test này chấm 18 mục và in ra **chính xác còn phải sửa gì**. Nó tự chạy hộ bạn:
+
+- Đủ 4 tool lõi trong `AVAILABLE_TOOLS` chưa
+- Docstring có `Args` / `Returns` / câu "Dùng tool này khi..." chưa
+- Gọi thật với SĐT sai, mã khóa sai, tham số rỗng → có trả `LỖI:` hay **crash**
+- Khóa online có bị in ra `None` không (bẫy `si_so = null`)
+- **Đủ 7 kết quả `check_suitability` ở bảng trên** — sai chiều nào nó chỉ đúng chiều đó
+
+Chạy tới khi thấy `COVERAGE: 18/18` là xong phần bạn.
+
+---
+
 ## ✅ Checklist
 
 - [ ] Mốc 1: Load được `mock_database.json`, chốt danh sách tool với nhóm
