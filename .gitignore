@@ -7,3 +7,4 @@ env/
 venv/
 .env.*
 !.env.example
+config/hoc_vien_moi.json

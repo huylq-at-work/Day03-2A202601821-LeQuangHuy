@@ -144,7 +144,59 @@ else:
                  + f". Đang trả: {r[:70]}")
 
 # ---------------------------------------------------------------- tham số lạ
-c.muc("[7] Chống crash với tham số lạ")
+c.muc("[7] dang_ky_hoc_vien — tool ghi dữ liệu")
+
+if "dang_ky_hoc_vien" not in REG:
+    c.ok("Có tool dang_ky_hoc_vien", False, "Chưa có tool đăng ký học viên mới")
+else:
+    dk = REG["dang_ky_hoc_vien"]
+    c.ok("Có tool dang_ky_hoc_vien", True)
+
+    def thu_dk(*a):
+        try:
+            return str(dk(*a))
+        except Exception as e:
+            return f"CRASH {type(e).__name__}"
+
+    r = thu_dk("123", "Trần Văn Nam", "AI", "cơ bản", "5000000", "Hà Nội", "T2 tối")
+    c.ok("SĐT sai định dạng -> LỖI", r.upper().startswith("LỖI"),
+         f"SĐT '123' phải bị từ chối, đang trả: {r[:60]}")
+
+    r = thu_dk("0912345203", "Trần Văn Nam", "AI", "cơ bản", "5000000", "Hà Nội", "T2 tối")
+    c.ok("SĐT đã tồn tại -> LỖI", r.upper().startswith("LỖI"),
+         "Không được ghi đè hồ sơ đã có")
+
+    r = thu_dk("0977111222", "Trần Văn Nam", "AI", "siêu cấp", "5000000", "Hà Nội", "T2 tối")
+    c.ok("Trình độ không hợp lệ -> LỖI", r.upper().startswith("LỖI"),
+         f"Trình độ 'siêu cấp' phải bị từ chối, đang trả: {r[:60]}")
+
+    r = thu_dk("0977111222", "Trần Văn Nam", "AI", "cơ bản", "abc", "Hà Nội", "T2 tối")
+    c.ok("Ngân sách không phải số -> LỖI", r.upper().startswith("LỖI"),
+         "Ngân sách 'abc' phải bị từ chối")
+
+    r = thu_dk("0977111222", "", "AI", "cơ bản", "5000000", "Hà Nội", "T2 tối")
+    c.ok("Thiếu họ tên -> LỖI", r.upper().startswith("LỖI"), "Họ tên rỗng phải bị từ chối")
+
+    # Đăng ký thật rồi kiểm tra file gốc có bị đụng vào không
+    import hashlib
+    from _harness import duong_dan as _dd
+
+    def _bam():
+        with open(_dd("config", "mock_database.json"), "rb") as fh:
+            return hashlib.md5(fh.read()).hexdigest()
+
+    truoc = _bam()
+    sdt_thu = "0900000199"
+    thu_dk(sdt_thu, "Học Viên Kiểm Thử", "AI", "cơ bản", "4000000", "Hà Nội", "T2 tối|T4 tối")
+    c.ok("mock_database.json KHÔNG bị ghi đè", truoc == _bam(),
+         "Hồ sơ mới phải lưu sang config/hoc_vien_moi.json, không được sửa file dữ liệu gốc "
+         "(sửa là script tái lập và test của Role 1 hỏng theo)")
+
+    r = thu_dk(sdt_thu, "Trùng", "AI", "cơ bản", "4000000", "Hà Nội", "T2 tối")
+    c.ok("Hồ sơ vừa tạo tra lại được", r.upper().startswith("LỖI") and "đã có hồ sơ" in r,
+         "Sau khi tạo, gọi lại cùng SĐT phải báo đã tồn tại")
+
+c.muc("[8] Chống crash với tham số lạ")
 for ten in TOOL_LOI:
     if ten not in REG:
         continue

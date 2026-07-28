@@ -21,6 +21,18 @@ COURSES = _DB["courses"]
 PROVIDERS = _DB["providers"]
 INSTRUCTORS = _DB["instructors"]
 
+# Học viên đăng ký mới lưu riêng, KHÔNG ghi đè mock_database.json.
+# Giữ file gốc bất biến để scripts/gen_database.py luôn tái lập được
+# và bộ test của Role 1 không bị lệch kết quả.
+_HOC_VIEN_MOI_PATH = os.path.join(_BASE, "config", "hoc_vien_moi.json")
+
+if os.path.exists(_HOC_VIEN_MOI_PATH):
+    try:
+        with open(_HOC_VIEN_MOI_PATH, "r", encoding="utf-8") as f:
+            LEARNERS.update(json.load(f))
+    except Exception:
+        pass
+
 CAP_DO = _DB["_meta"]["cap_do"]
 NGAY_HIEN_TAI = _DB["_meta"]["ngay_hien_tai"]
 
@@ -149,9 +161,13 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
             matches.append((course["gia"], code, course))
 
     if not matches:
+        # Gợi ý chủ đề đang có để Agent tư vấn tiếp thay vì trả lời cụt lủn
+        co_san = sorted({cd for c in COURSES.values() for cd in c["chu_de"]})
+        re_nhat = min(c["gia"] for c in COURSES.values())
         return (
-            f"Không tìm thấy khóa học nào về '{topic}' "
-            f"dưới {_money(max_price)}."
+            f"Không tìm thấy khóa học nào về '{topic}' dưới {_money(max_price)}. "
+            f"Các chủ đề hiện có: {', '.join(co_san)}. "
+            f"Khóa rẻ nhất trên hệ thống là {_money(re_nhat)}."
         )
 
     matches.sort(key=lambda item: (item[0], item[1]))
@@ -363,6 +379,89 @@ def compare_courses(ma1: str, ma2: str) -> str:
 
 
 # Registry duy nhất để app.py gọi tool theo tên do Agent sinh ra.
+def dang_ky_hoc_vien(sdt: str, ho_ten: str, muc_tieu: str, trinh_do: str,
+                     ngan_sach: str, khu_vuc: str, lich_ranh: str) -> str:
+    """
+    Tạo hồ sơ học viên mới cho người chưa có trong hệ thống.
+
+    Dùng tool này khi get_learner báo không tìm thấy số điện thoại, HOẶC khi
+    người dùng nói muốn đăng ký tài khoản mới. TUYỆT ĐỐI không tự bịa thông tin:
+    phải hỏi người dùng đủ 7 trường rồi mới được gọi.
+
+    Args:
+        sdt (str): Số điện thoại, 10 chữ số, bắt đầu bằng 0 (Ví dụ: '0912345678')
+        ho_ten (str): Họ tên đầy đủ
+        muc_tieu (str): Chủ đề muốn học, nhiều mục ngăn bằng dấu | (Ví dụ: 'AI|dữ liệu')
+        trinh_do (str): Một trong: mới bắt đầu, cơ bản, trung cấp, nâng cao
+        ngan_sach (str): Ngân sách tối đa tính bằng đồng (Ví dụ: '5000000')
+        khu_vuc (str): Tỉnh/thành đang ở (Ví dụ: 'Hà Nội')
+        lich_ranh (str): Các buổi rảnh, ngăn bằng dấu | (Ví dụ: 'T2 tối|CN sáng')
+
+    Returns:
+        str: Xác nhận đã tạo hồ sơ, hoặc chuỗi báo lỗi nếu dữ liệu không hợp lệ.
+    """
+    sdt = _clean(sdt)
+    if not (sdt.isdigit() and len(sdt) == 10 and sdt.startswith("0")):
+        return (f"LỖI: Số điện thoại '{sdt}' không hợp lệ. "
+                "Cần đúng 10 chữ số và bắt đầu bằng 0.")
+
+    if sdt in LEARNERS:
+        return (f"LỖI: Số điện thoại {sdt} đã có hồ sơ mang tên "
+                f"{LEARNERS[sdt]['ho_ten']}. Dùng get_learner để xem thay vì tạo mới.")
+
+    ho_ten = _clean(ho_ten)
+    if len(ho_ten) < 2:
+        return "LỖI: Thiếu họ tên học viên."
+
+    trinh_do = _clean(trinh_do).lower()
+    if trinh_do not in CAP_DO:
+        return (f"LỖI: Trình độ '{trinh_do}' không hợp lệ. "
+                f"Chỉ nhận: {', '.join(CAP_DO)}.")
+
+    tien = _parse_price(ngan_sach)
+    if tien is None or tien <= 0:
+        return f"LỖI: Ngân sách '{ngan_sach}' không hợp lệ, cần là số tiền dương."
+
+    def _tach(chuoi):
+        return [x.strip() for x in _clean(chuoi).replace(",", "|").split("|") if x.strip()]
+
+    ds_muc_tieu = _tach(muc_tieu)
+    ds_lich = _tach(lich_ranh)
+    if not ds_muc_tieu:
+        return "LỖI: Thiếu mục tiêu học. Ví dụ: 'AI|dữ liệu'."
+    if not ds_lich:
+        return "LỖI: Thiếu lịch rảnh. Ví dụ: 'T2 tối|CN sáng'."
+
+    ho_so = {
+        "ho_ten": ho_ten,
+        "muc_tieu": ds_muc_tieu,
+        "trinh_do": trinh_do,
+        "ngan_sach": tien,
+        "lich_ranh": ds_lich,
+        "khu_vuc": _clean(khu_vuc) or "Không rõ",
+        "hinh_thuc_uu_tien": "cả hai",
+        "da_hoc": [],
+    }
+
+    LEARNERS[sdt] = ho_so
+    try:
+        moi = {}
+        if os.path.exists(_HOC_VIEN_MOI_PATH):
+            with open(_HOC_VIEN_MOI_PATH, "r", encoding="utf-8") as f:
+                moi = json.load(f)
+        moi[sdt] = ho_so
+        with open(_HOC_VIEN_MOI_PATH, "w", encoding="utf-8") as f:
+            json.dump(moi, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        del LEARNERS[sdt]
+        return f"LỖI: Không lưu được hồ sơ ({e}). Vui lòng thử lại."
+
+    return (f"Đã tạo hồ sơ cho {ho_ten} — số điện thoại {sdt}; "
+            f"mục tiêu: {', '.join(ds_muc_tieu)}; trình độ: {trinh_do}; "
+            f"ngân sách: {_money(tien)}; rảnh: {', '.join(ds_lich)}; "
+            f"khu vực: {ho_so['khu_vuc']}. Giờ có thể tìm khóa phù hợp cho học viên này.")
+
+
 AVAILABLE_TOOLS = {
     "get_learner": get_learner,
     "search_courses": search_courses,
@@ -370,4 +469,5 @@ AVAILABLE_TOOLS = {
     "check_suitability": check_suitability,
     "get_provider": get_provider,
     "compare_courses": compare_courses,
+    "dang_ky_hoc_vien": dang_ky_hoc_vien,
 }
