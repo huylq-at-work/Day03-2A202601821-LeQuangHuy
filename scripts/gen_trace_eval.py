@@ -100,29 +100,50 @@ for case in cases:
         f"**Nhận xét**: {nhan_xet(steps)}\n"
     )
 
-# Giữ nguyên mục 1 (Scoring Matrix) do Role 1 viết
+# Chỉ thay phần nằm giữa 2 mốc dưới đây. Mọi nội dung do người khác viết thêm
+# (mục 3 trở đi) được giữ nguyên — script này không được phép xóa bài của ai.
+BAT_DAU = "<!-- BEGIN AUTO-TRACE -->"
+KET_THUC = "<!-- END AUTO-TRACE -->"
+
 cu = ""
 if os.path.exists(OUT):
     with open(OUT, encoding="utf-8") as f:
         cu = f.read()
-dau = cu.split("## 2.")[0].rstrip() if "## 2." in cu else "# 🟢 Role 1: Đánh Giá Agentic Fit & Trace Log"
+
+if BAT_DAU in cu and KET_THUC in cu:
+    dau = cu.split(BAT_DAU)[0].rstrip()
+    duoi = cu.split(KET_THUC, 1)[1].lstrip()
+else:
+    # Lần đầu chạy: mục 1 là phần đầu, từ mục 3 trở đi là phần đuôi cần giữ
+    dau = cu.split("## 2.")[0].rstrip() if "## 2." in cu else \
+        "# 🟢 Role 1: Đánh Giá Agentic Fit & Trace Log"
+    duoi = ""
+    for moc in ("## 3.", "## 4."):
+        if moc in cu:
+            duoi = moc + cu.split(moc, 1)[1].lstrip(moc).rstrip() + "\n"
+            break
 
 mo_hinh = getattr(provider, "model_name", "?")
 than = (
     f"{dau}\n\n"
+    f"{BAT_DAU}\n\n"
     f"## 2. Trace Log — output thật của chương trình\n\n"
     f"> Sinh tự động bằng `scripts/gen_trace_eval.py`, chạy trên "
     f"`{ten_provider}` (model `{mo_hinh}`) với `MAX_ITERATIONS = {MAX_ITERATIONS}`.\n"
     f"> Chạy lại script là ra lại toàn bộ log này — không chép tay.\n\n"
     + "\n---\n\n".join(phan)
-    + "\n---\n\n## 3. Kết luận so sánh\n\n"
+    + "\n---\n\n### 2.6. Kết luận nhanh\n\n"
     "Trên các câu cần dữ liệu thật, Chatbot baseline chỉ đưa lời khuyên chung vì không "
     "truy cập được hồ sơ học viên hay danh mục khóa học. ReAct Agent gọi tool tra đúng "
     "dữ liệu rồi mới kết luận, và nêu được lý do cụ thể khi học viên không đủ điều kiện.\n\n"
     "Ngược lại, với câu hỏi kiến thức chung thì Chatbot trả lời tốt mà không cần tool — "
     "đây là lý do cần luồng Hybrid trong `docs/hybrid_flowchart.mermaid` thay vì đẩy mọi "
-    "câu hỏi qua Agent.\n"
+    "câu hỏi qua Agent.\n\n"
+    f"{KET_THUC}\n"
 )
+
+if duoi:
+    than += "\n---\n\n" + duoi
 
 with open(OUT, "w", encoding="utf-8") as f:
     f.write(than)
