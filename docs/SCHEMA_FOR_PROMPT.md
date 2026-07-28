@@ -3,7 +3,7 @@
 > File này **sinh tự động** từ [`config/mock_database.json`](../config/mock_database.json) — không chỉnh tay, dữ liệu đổi thì chạy lại script.
 > Mục đích: để Role 3 viết ví dụ few-shot trong `REACT_SYSTEM_PROMPT` **dùng đúng dữ liệu có thật**.
 
-**Quy mô**: 1,000 học viên · 28 khóa học · 8 nhà cung cấp · 12 giảng viên.  
+**Quy mô**: 1,000 học viên · 128 khóa học · 8 nhà cung cấp · 12 giảng viên.  
 **Ngày hệ thống (cố định)**: `2026-07-28`
 
 ---
@@ -16,7 +16,7 @@ Viết ví dụ trong prompt thì phải dùng đúng các giá trị dưới đ
 | :-- | :-- |
 | **Trình độ** (có thứ tự) | `mới bắt đầu` < `cơ bản` < `trung cấp` < `nâng cao` |
 | Trình độ học viên thực tế | `mới bắt đầu`, `cơ bản`, `trung cấp` |
-| **Chủ đề khóa học** | `AI`, `IELTS`, `công việc`, `dữ liệu`, `giao tiếp`, `khoa học`, `kế toán`, `kỹ năng mềm`, `lập trình`, `marketing`, `ngoại ngữ`, `nhiếp ảnh`, `python`, `quản trị`, `thiết kế`, `tiếng Anh`, `tiếng Hàn`, `tiếng Nhật`, `toán`, `tài chính`, `vật lý`, `web`, `âm nhạc`, `đầu tư` |
+| **Chủ đề khóa học** | `AI`, `IELTS`, `bảo mật`, `công việc`, `dữ liệu`, `giao tiếp`, `khoa học`, `kế toán`, `kỹ năng mềm`, `lập trình`, `marketing`, `mobile`, `ngoại ngữ`, `nhiếp ảnh`, `python`, `quản trị`, `thiết kế`, `tiếng Anh`, `tiếng Hàn`, `tiếng Nhật`, `tiếng Trung`, `toán`, `tài chính`, `vật lý`, `web`, `âm nhạc`, `đầu tư` |
 | Mục tiêu học viên | `AI`, `IELTS`, `dữ liệu`, `lập trình`, `marketing`, `thiết kế`, `tiếng Anh`, `web` |
 | **Khu vực** | `Cần Thơ`, `Hà Nội`, `Hải Phòng`, `TP.HCM`, `Đà Nẵng` |
 | **Hình thức** | khóa học: `online` / `offline` · ưu tiên HV: `cả hai`, `offline`, `online` |
@@ -60,6 +60,106 @@ Dùng bảng này để viết ví dụ — mọi mã khóa, giá, lịch đều
 | `MU101` | Guitar đệm hát cho người mới | âm nhạc | mới bắt đầu | of | 2,800,000 | T7 09:00-11:00, CN 09:00-11:00 | Hà Nội | 11/20 | 2026-08-24 |
 | `SK101` | Kỹ năng thuyết trình | kỹ năng mềm | mới bắt đầu | on | 1,100,000 | tự học | — | ∞ | — |
 | `SK201` | Quản trị dự án cho người đi làm | kỹ năng mềm, quản trị | cơ bản | of | 7,500,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 19/28 | 2026-09-05 |
+| `ENX101` | Tiếng Anh nhập môn | tiếng Anh, ngoại ngữ | mới bắt đầu | of | 940,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 26/36 | 2026-09-09 |
+| `ENX102` | Tiếng Anh cơ bản | tiếng Anh, ngoại ngữ | mới bắt đầu | on | 1,720,000 | tự học | — | ∞ | — |
+| `ENX103` | Tiếng Anh thực hành | tiếng Anh, ngoại ngữ | cơ bản | on | 2,100,000 | tự học | — | ∞ | — |
+| `ENX104` | Tiếng Anh chuyên sâu | tiếng Anh, ngoại ngữ | trung cấp | of | 5,850,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 25/26 | 2026-09-06 |
+| `ENX105` | Tiếng Anh nâng cao | tiếng Anh, ngoại ngữ | nâng cao | on | 11,350,000 | tự học | — | ∞ | — |
+| `JPX101` | Tiếng Nhật nhập môn | tiếng Nhật, ngoại ngữ | mới bắt đầu | of | 1,290,000 | T2 18:00-20:00, T6 18:00-20:00 | TP.HCM | 22/24 | 2026-09-01 |
+| `JPX102` | Tiếng Nhật cơ bản | tiếng Nhật, ngoại ngữ | mới bắt đầu | on | 880,000 | tự học | — | ∞ | — |
+| `JPX103` | Tiếng Nhật thực hành | tiếng Nhật, ngoại ngữ | cơ bản | on | 2,390,000 | tự học | — | ∞ | — |
+| `JPX104` | Tiếng Nhật chuyên sâu | tiếng Nhật, ngoại ngữ | trung cấp | of | 5,200,000 | T7 09:00-11:30, CN 09:00-11:30 | TP.HCM | 1/33 | 2026-09-09 |
+| `JPX105` | Tiếng Nhật nâng cao | tiếng Nhật, ngoại ngữ | nâng cao | on | 12,860,000 | tự học | — | ∞ | — |
+| `KRX101` | Tiếng Hàn nhập môn | tiếng Hàn, ngoại ngữ | mới bắt đầu | of | 1,590,000 | T3 19:00-21:00, T5 19:00-21:00 | TP.HCM | 21/24 | 2026-09-08 |
+| `KRX102` | Tiếng Hàn cơ bản | tiếng Hàn, ngoại ngữ | mới bắt đầu | on | 1,220,000 | tự học | — | ∞ | — |
+| `KRX103` | Tiếng Hàn thực hành | tiếng Hàn, ngoại ngữ | cơ bản | on | 2,860,000 | tự học | — | ∞ | — |
+| `KRX104` | Tiếng Hàn chuyên sâu | tiếng Hàn, ngoại ngữ | trung cấp | of | 3,850,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 25/28 | 2026-09-08 |
+| `KRX105` | Tiếng Hàn nâng cao | tiếng Hàn, ngoại ngữ | nâng cao | on | 13,730,000 | tự học | — | ∞ | — |
+| `ZHX101` | Tiếng Trung nhập môn | tiếng Trung, ngoại ngữ | mới bắt đầu | of | 1,730,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 29/37 | 2026-09-06 |
+| `ZHX102` | Tiếng Trung cơ bản | tiếng Trung, ngoại ngữ | mới bắt đầu | on | 1,770,000 | tự học | — | ∞ | — |
+| `ZHX103` | Tiếng Trung thực hành | tiếng Trung, ngoại ngữ | cơ bản | on | 2,500,000 | tự học | — | ∞ | — |
+| `ZHX104` | Tiếng Trung chuyên sâu | tiếng Trung, ngoại ngữ | trung cấp | of | 3,820,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 14/24 | 2026-09-01 |
+| `ZHX105` | Tiếng Trung nâng cao | tiếng Trung, ngoại ngữ | nâng cao | on | 6,700,000 | tự học | — | ∞ | — |
+| `PRX101` | Lập trình Python nhập môn | lập trình, python | mới bắt đầu | of | 1,250,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 22/24 | 2026-09-08 |
+| `PRX102` | Lập trình Python cơ bản | lập trình, python | mới bắt đầu | on | 1,160,000 | tự học | — | ∞ | — |
+| `PRX103` | Lập trình Python thực hành | lập trình, python | cơ bản | on | 2,560,000 | tự học | — | ∞ | — |
+| `PRX104` | Lập trình Python chuyên sâu | lập trình, python | trung cấp | of | 6,290,000 | T7 09:00-11:30, CN 09:00-11:30 | Hà Nội | 16/29 | 2026-09-03 |
+| `PRX105` | Lập trình Python nâng cao | lập trình, python | nâng cao | on | 6,890,000 | tự học | — | ∞ | — |
+| `WBX101` | Lập trình Web nhập môn | web, lập trình | mới bắt đầu | of | 1,430,000 | T7 09:00-11:30, CN 09:00-11:30 | Hà Nội | 14/20 | 2026-09-05 |
+| `WBX102` | Lập trình Web cơ bản | web, lập trình | mới bắt đầu | on | 1,670,000 | tự học | — | ∞ | — |
+| `WBX103` | Lập trình Web thực hành | web, lập trình | cơ bản | on | 2,410,000 | tự học | — | ∞ | — |
+| `WBX104` | Lập trình Web chuyên sâu | web, lập trình | trung cấp | of | 3,290,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 3/32 | 2026-09-01 |
+| `WBX105` | Lập trình Web nâng cao | web, lập trình | nâng cao | on | 7,580,000 | tự học | — | ∞ | — |
+| `MBX101` | Lập trình Mobile nhập môn | mobile, lập trình | mới bắt đầu | of | 1,150,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 13/24 | 2026-09-05 |
+| `MBX102` | Lập trình Mobile cơ bản | mobile, lập trình | mới bắt đầu | on | 1,490,000 | tự học | — | ∞ | — |
+| `MBX103` | Lập trình Mobile thực hành | mobile, lập trình | cơ bản | on | 3,140,000 | tự học | — | ∞ | — |
+| `MBX104` | Lập trình Mobile chuyên sâu | mobile, lập trình | trung cấp | of | 4,860,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 14/36 | 2026-09-04 |
+| `MBX105` | Lập trình Mobile nâng cao | mobile, lập trình | nâng cao | on | 9,810,000 | tự học | — | ∞ | — |
+| `AIX101` | Trí tuệ nhân tạo nhập môn | AI, dữ liệu | mới bắt đầu | of | 1,070,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 13/31 | 2026-09-09 |
+| `AIX102` | Trí tuệ nhân tạo cơ bản | AI, dữ liệu | mới bắt đầu | on | 1,140,000 | tự học | — | ∞ | — |
+| `AIX103` | Trí tuệ nhân tạo thực hành | AI, dữ liệu | cơ bản | on | 1,710,000 | tự học | — | ∞ | — |
+| `AIX104` | Trí tuệ nhân tạo chuyên sâu | AI, dữ liệu | trung cấp | of | 6,180,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 8/25 | 2026-09-06 |
+| `AIX105` | Trí tuệ nhân tạo nâng cao | AI, dữ liệu | nâng cao | on | 13,820,000 | tự học | — | ∞ | — |
+| `DAX101` | Phân tích dữ liệu nhập môn | dữ liệu | mới bắt đầu | of | 1,230,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 9/20 | 2026-09-01 |
+| `DAX102` | Phân tích dữ liệu cơ bản | dữ liệu | mới bắt đầu | on | 1,420,000 | tự học | — | ∞ | — |
+| `DAX103` | Phân tích dữ liệu thực hành | dữ liệu | cơ bản | on | 2,790,000 | tự học | — | ∞ | — |
+| `DAX104` | Phân tích dữ liệu chuyên sâu | dữ liệu | trung cấp | of | 4,940,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 12/23 | 2026-09-05 |
+| `DAX105` | Phân tích dữ liệu nâng cao | dữ liệu | nâng cao | on | 6,480,000 | tự học | — | ∞ | — |
+| `SCX101` | An toàn thông tin nhập môn | bảo mật | mới bắt đầu | of | 1,380,000 | T7 09:00-11:30, CN 09:00-11:30 | TP.HCM | 17/23 | 2026-09-01 |
+| `SCX102` | An toàn thông tin cơ bản | bảo mật | mới bắt đầu | on | 810,000 | tự học | — | ∞ | — |
+| `SCX103` | An toàn thông tin thực hành | bảo mật | cơ bản | on | 1,760,000 | tự học | — | ∞ | — |
+| `SCX104` | An toàn thông tin chuyên sâu | bảo mật | trung cấp | of | 3,120,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 24/38 | 2026-09-07 |
+| `SCX105` | An toàn thông tin nâng cao | bảo mật | nâng cao | on | 7,840,000 | tự học | — | ∞ | — |
+| `DGX101` | Thiết kế đồ họa nhập môn | thiết kế | mới bắt đầu | of | 1,520,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 17/24 | 2026-09-05 |
+| `DGX102` | Thiết kế đồ họa cơ bản | thiết kế | mới bắt đầu | on | 1,350,000 | tự học | — | ∞ | — |
+| `DGX103` | Thiết kế đồ họa thực hành | thiết kế | cơ bản | on | 2,660,000 | tự học | — | ∞ | — |
+| `DGX104` | Thiết kế đồ họa chuyên sâu | thiết kế | trung cấp | of | 5,180,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 1/21 | 2026-09-08 |
+| `DGX105` | Thiết kế đồ họa nâng cao | thiết kế | nâng cao | on | 13,230,000 | tự học | — | ∞ | — |
+| `PTX101` | Nhiếp ảnh nhập môn | nhiếp ảnh | mới bắt đầu | of | 1,180,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 14/28 | 2026-09-06 |
+| `PTX102` | Nhiếp ảnh cơ bản | nhiếp ảnh | mới bắt đầu | on | 1,680,000 | tự học | — | ∞ | — |
+| `PTX103` | Nhiếp ảnh thực hành | nhiếp ảnh | cơ bản | on | 1,820,000 | tự học | — | ∞ | — |
+| `PTX104` | Nhiếp ảnh chuyên sâu | nhiếp ảnh | trung cấp | of | 6,500,000 | T3 19:00-21:00, T5 19:00-21:00 | Hà Nội | 23/33 | 2026-09-05 |
+| `PTX105` | Nhiếp ảnh nâng cao | nhiếp ảnh | nâng cao | on | 12,000,000 | tự học | — | ∞ | — |
+| `MKX101` | Digital Marketing nhập môn | marketing | mới bắt đầu | of | 1,330,000 | T7 09:00-11:30, CN 09:00-11:30 | Hà Nội | 20/21 | 2026-09-09 |
+| `MKX102` | Digital Marketing cơ bản | marketing | mới bắt đầu | on | 910,000 | tự học | — | ∞ | — |
+| `MKX103` | Digital Marketing thực hành | marketing | cơ bản | on | 1,590,000 | tự học | — | ∞ | — |
+| `MKX104` | Digital Marketing chuyên sâu | marketing | trung cấp | of | 4,230,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 12/37 | 2026-09-07 |
+| `MKX105` | Digital Marketing nâng cao | marketing | nâng cao | on | 13,110,000 | tự học | — | ∞ | — |
+| `FIX101` | Tài chính cá nhân nhập môn | tài chính | mới bắt đầu | of | 1,050,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 5/20 | 2026-09-03 |
+| `FIX102` | Tài chính cá nhân cơ bản | tài chính | mới bắt đầu | on | 690,000 | tự học | — | ∞ | — |
+| `FIX103` | Tài chính cá nhân thực hành | tài chính | cơ bản | on | 2,760,000 | tự học | — | ∞ | — |
+| `FIX104` | Tài chính cá nhân chuyên sâu | tài chính | trung cấp | of | 3,450,000 | T2 18:00-20:00, T6 18:00-20:00 | Hà Nội | 22/32 | 2026-09-02 |
+| `FIX105` | Tài chính cá nhân nâng cao | tài chính | nâng cao | on | 10,660,000 | tự học | — | ∞ | — |
+| `ACX101` | Kế toán nhập môn | kế toán | mới bắt đầu | of | 1,410,000 | T2 19:00-21:00, T4 19:00-21:00 | Hà Nội | 8/22 | 2026-09-05 |
+| `ACX102` | Kế toán cơ bản | kế toán | mới bắt đầu | on | 1,370,000 | tự học | — | ∞ | — |
+| `ACX103` | Kế toán thực hành | kế toán | cơ bản | on | 3,020,000 | tự học | — | ∞ | — |
+| `ACX104` | Kế toán chuyên sâu | kế toán | trung cấp | of | 6,380,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 26/27 | 2026-09-07 |
+| `ACX105` | Kế toán nâng cao | kế toán | nâng cao | on | 7,300,000 | tự học | — | ∞ | — |
+| `SKX101` | Kỹ năng mềm nhập môn | kỹ năng mềm | mới bắt đầu | of | 1,250,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 4/23 | 2026-09-05 |
+| `SKX102` | Kỹ năng mềm cơ bản | kỹ năng mềm | mới bắt đầu | on | 1,390,000 | tự học | — | ∞ | — |
+| `SKX103` | Kỹ năng mềm thực hành | kỹ năng mềm | cơ bản | on | 2,830,000 | tự học | — | ∞ | — |
+| `SKX104` | Kỹ năng mềm chuyên sâu | kỹ năng mềm | trung cấp | of | 4,720,000 | T7 09:00-11:30, CN 09:00-11:30 | TP.HCM | 6/23 | 2026-09-09 |
+| `SKX105` | Kỹ năng mềm nâng cao | kỹ năng mềm | nâng cao | on | 6,500,000 | tự học | — | ∞ | — |
+| `PMX101` | Quản trị dự án nhập môn | quản trị, kỹ năng mềm | mới bắt đầu | of | 1,220,000 | T2 18:00-20:00, T6 18:00-20:00 | Hà Nội | 27/30 | 2026-09-08 |
+| `PMX102` | Quản trị dự án cơ bản | quản trị, kỹ năng mềm | mới bắt đầu | on | 770,000 | tự học | — | ∞ | — |
+| `PMX103` | Quản trị dự án thực hành | quản trị, kỹ năng mềm | cơ bản | on | 2,180,000 | tự học | — | ∞ | — |
+| `PMX104` | Quản trị dự án chuyên sâu | quản trị, kỹ năng mềm | trung cấp | of | 5,610,000 | T3 19:00-21:00, T5 19:00-21:00 | TP.HCM | 3/22 | 2026-09-01 |
+| `PMX105` | Quản trị dự án nâng cao | quản trị, kỹ năng mềm | nâng cao | on | 13,910,000 | tự học | — | ∞ | — |
+| `PHX101` | Vật lý nhập môn | vật lý, khoa học | mới bắt đầu | of | 870,000 | T2 18:00-20:00, T6 18:00-20:00 | Hà Nội | 8/33 | 2026-09-09 |
+| `PHX102` | Vật lý cơ bản | vật lý, khoa học | mới bắt đầu | on | 1,570,000 | tự học | — | ∞ | — |
+| `PHX103` | Vật lý thực hành | vật lý, khoa học | cơ bản | on | 3,480,000 | tự học | — | ∞ | — |
+| `PHX104` | Vật lý chuyên sâu | vật lý, khoa học | trung cấp | of | 5,540,000 | T6 18:30-20:30, T7 09:00-11:00 | TP.HCM | 20/28 | 2026-09-01 |
+| `PHX105` | Vật lý nâng cao | vật lý, khoa học | nâng cao | on | 12,790,000 | tự học | — | ∞ | — |
+| `MAX101` | Toán học nhập môn | toán, khoa học | mới bắt đầu | of | 1,530,000 | T2 19:00-21:00, T4 19:00-21:00 | TP.HCM | 23/26 | 2026-09-02 |
+| `MAX102` | Toán học cơ bản | toán, khoa học | mới bắt đầu | on | 1,320,000 | tự học | — | ∞ | — |
+| `MAX103` | Toán học thực hành | toán, khoa học | cơ bản | on | 2,750,000 | tự học | — | ∞ | — |
+| `MAX104` | Toán học chuyên sâu | toán, khoa học | trung cấp | of | 3,330,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 12/25 | 2026-09-09 |
+| `MAX105` | Toán học nâng cao | toán, khoa học | nâng cao | on | 7,800,000 | tự học | — | ∞ | — |
+| `MUX101` | Âm nhạc nhập môn | âm nhạc | mới bắt đầu | of | 1,790,000 | T6 18:30-20:30, T7 09:00-11:00 | Hà Nội | 35/36 | 2026-09-03 |
+| `MUX102` | Âm nhạc cơ bản | âm nhạc | mới bắt đầu | on | 1,450,000 | tự học | — | ∞ | — |
+| `MUX103` | Âm nhạc thực hành | âm nhạc | cơ bản | on | 1,820,000 | tự học | — | ∞ | — |
+| `MUX104` | Âm nhạc chuyên sâu | âm nhạc | trung cấp | of | 3,550,000 | T2 19:00-21:00, T4 19:00-21:00 | Hà Nội | 5/21 | 2026-09-05 |
+| `MUX105` | Âm nhạc nâng cao | âm nhạc | nâng cao | on | 11,810,000 | tự học | — | ∞ | — |
 
 ⛔ = lớp đã đầy · ⏰ = hết hạn đăng ký · ∞ = online không giới hạn chỗ
 
@@ -196,6 +296,9 @@ Nguyễn Chí Hướng — mục tiêu: AI, dữ liệu; trình độ: mới b�
 
 ```
 AI302 - AI cho người mới bắt đầu - 1,500,000đ - online - mới bắt đầu
+AIX101 - Trí tuệ nhân tạo nhập môn - 1,070,000đ - offline - mới bắt đầu
+AIX102 - Trí tuệ nhân tạo cơ bản - 1,140,000đ - online - mới bắt đầu
+AIX103 - Trí tuệ nhân tạo thực hành - 1,710,000đ - online - cơ bản
 ```
 
 **`get_course_detail[AI301]`**

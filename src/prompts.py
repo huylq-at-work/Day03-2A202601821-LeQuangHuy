@@ -105,8 +105,16 @@ Khi gọi tool, luôn dùng cú pháp Action: ten_tool[tham_so], không dùng ng
    Làm gì: đặt 2 khóa cạnh nhau để so sánh giá, trình độ, hình thức, lịch, rating/chứng chỉ.
    Khi gọi: người dùng yêu cầu so sánh hai khóa hoặc phân vân giữa hai mã khóa cụ thể.
 
+7. list_topics[gia_toi_da]
+   Làm gì: liệt kê tất cả chủ đề đang có kèm số khóa và giá rẻ nhất mỗi chủ đề.
+   Khi gọi: người dùng hỏi mơ hồ, chưa nêu rõ chủ đề. Ví dụ: "có những khóa gì?",
+   "còn môn nào khác không?", "gợi ý vài môn cho tôi", "tôi chưa biết học gì".
+   Để trống tham số nếu không cần lọc giá: list_topics[]
+   CẤM: không được truyền chữ "khác", "tất cả", "môn khác" vào search_courses —
+   đó không phải tên chủ đề, phải dùng list_topics rồi hỏi lại người dùng chọn chủ đề nào.
+
 ## Tool ghi dữ liệu (dùng thận trọng)
-7. dang_ky_hoc_vien[sdt, ho_ten, muc_tieu, trinh_do, ngan_sach, khu_vuc, lich_ranh]
+8. dang_ky_hoc_vien[sdt, ho_ten, muc_tieu, trinh_do, ngan_sach, khu_vuc, lich_ranh]
    Làm gì: TẠO hồ sơ học viên mới. Đây là tool duy nhất ghi dữ liệu vào hệ thống.
    Khi gọi: get_learner báo không tìm thấy số điện thoại, hoặc người dùng nói muốn
    đăng ký/tạo tài khoản mới.

@@ -14,7 +14,7 @@ c = Check("ROLE 2 — TOOL ENGINEER (Nguyễn Chí Hướng)")
 db = nap_database()
 
 TOOL_LOI = ["get_learner", "search_courses", "get_course_detail", "check_suitability"]
-TOOL_THEM = ["get_provider", "compare_courses"]
+TOOL_THEM = ["get_provider", "compare_courses", "list_topics"]
 
 # ---------------------------------------------------------------- nạp module
 c.muc("[1] Nạp src/tools.py")
@@ -104,6 +104,26 @@ if "search_courses" in REG:
     c.thu("search_courses('AI', 2000000)", goi("search_courses", "AI", "2000000"))
     c.thu("search_courses('chủ đề không có', 1000)",
           goi("search_courses", "xyz không tồn tại", "1000"))
+
+    r_mh = c.thu("search_courses('khác', ...) — từ mơ hồ",
+                 goi("search_courses", "khác", "99000000"))
+    c.ok("Từ mơ hồ 'khác' không bị coi là tên chủ đề",
+         isinstance(r_mh, str) and "Không tìm thấy" not in r_mh,
+         "Người dùng hỏi 'còn môn khác không' thì LLM hay truyền chữ 'khác'. "
+         "Phải duyệt toàn danh mục thay vì đi tìm đúng chữ đó")
+
+    r_dai = c.thu("search_courses trả nhiều kết quả — có cắt bớt không",
+                  goi("search_courses", "lập trình", "99000000"))
+    c.ok("Kết quả dài được cắt và nói rõ đã cắt",
+         isinstance(r_dai, str) and (r_dai.count("\n") <= 16),
+         "128 khóa mà đổ hết ra thì Observation quá dài, phải giới hạn và ghi rõ còn bao nhiêu")
+
+if "list_topics" in REG:
+    r_lt = c.thu("list_topics() — không lọc giá", goi("list_topics", ""))
+    c.ok("Trả về danh sách chủ đề kèm số khóa",
+         isinstance(r_lt, str) and "chủ đề" in r_lt and "khóa" in r_lt,
+         "list_topics phải liệt kê chủ đề kèm số lượng khóa")
+    c.thu("list_topics('1000000') — có lọc giá", goi("list_topics", "1000000"))
 
 # ---------------------------------------------------------------- 7 ca chuẩn
 c.muc("[6] check_suitability — 7 trường hợp đã kiểm chứng")

@@ -136,6 +136,75 @@ COURSES = dict([
         "2026-09-12", "2026-09-05", "Hà Nội", 28, 19, 4.6, True, "GV12"),
 ])
 
+# ---------- Sinh them 100 khoa hoc phu kin cac chu de va cap do ----------
+# 28 khoa viet tay o tren giu nguyen vi cac bay phu thuoc vao chung.
+CHU_DE_100 = [
+    ("Tiếng Anh", "ENX", ["tiếng Anh", "ngoại ngữ"]),
+    ("Tiếng Nhật", "JPX", ["tiếng Nhật", "ngoại ngữ"]),
+    ("Tiếng Hàn", "KRX", ["tiếng Hàn", "ngoại ngữ"]),
+    ("Tiếng Trung", "ZHX", ["tiếng Trung", "ngoại ngữ"]),
+    ("Lập trình Python", "PRX", ["lập trình", "python"]),
+    ("Lập trình Web", "WBX", ["web", "lập trình"]),
+    ("Lập trình Mobile", "MBX", ["mobile", "lập trình"]),
+    ("Trí tuệ nhân tạo", "AIX", ["AI", "dữ liệu"]),
+    ("Phân tích dữ liệu", "DAX", ["dữ liệu"]),
+    ("An toàn thông tin", "SCX", ["bảo mật"]),
+    ("Thiết kế đồ họa", "DGX", ["thiết kế"]),
+    ("Nhiếp ảnh", "PTX", ["nhiếp ảnh"]),
+    ("Digital Marketing", "MKX", ["marketing"]),
+    ("Tài chính cá nhân", "FIX", ["tài chính"]),
+    ("Kế toán", "ACX", ["kế toán"]),
+    ("Kỹ năng mềm", "SKX", ["kỹ năng mềm"]),
+    ("Quản trị dự án", "PMX", ["quản trị", "kỹ năng mềm"]),
+    ("Vật lý", "PHX", ["vật lý", "khoa học"]),
+    ("Toán học", "MAX", ["toán", "khoa học"]),
+    ("Âm nhạc", "MUX", ["âm nhạc"]),
+]
+
+HAU_TO = ["nhập môn", "cơ bản", "thực hành", "chuyên sâu", "nâng cao"]
+CAP_THEO_MUC = ["mới bắt đầu", "mới bắt đầu", "cơ bản", "trung cấp", "nâng cao"]
+GIA_THEO_CAP = {"mới bắt đầu": (690_000, 1_800_000), "cơ bản": (1_500_000, 3_500_000),
+                "trung cấp": (3_000_000, 7_000_000), "nâng cao": (6_000_000, 14_000_000)}
+NCC_ONLINE = ["NT01", "NT02", "NT03"]
+NCC_OFFLINE = ["TT01", "TT02", "TT03", "TT04", "TT05"]
+GV_THEO_CHU_DE = {"tiếng Anh": "GV01", "tiếng Nhật": "GV08", "tiếng Hàn": "GV08",
+                  "tiếng Trung": "GV08", "lập trình": "GV02", "web": "GV02",
+                  "mobile": "GV02", "AI": "GV03", "dữ liệu": "GV04", "bảo mật": "GV04",
+                  "thiết kế": "GV05", "nhiếp ảnh": "GV10", "marketing": "GV06",
+                  "tài chính": "GV09", "kế toán": "GV09", "kỹ năng mềm": "GV12",
+                  "quản trị": "GV12", "vật lý": "GV07", "toán": "GV07", "âm nhạc": "GV11"}
+CA_HOC = [["T2 19:00-21:00", "T4 19:00-21:00"], ["T3 19:00-21:00", "T5 19:00-21:00"],
+          ["T6 18:30-20:30", "T7 09:00-11:00"], ["T7 09:00-11:30", "CN 09:00-11:30"],
+          ["T2 18:00-20:00", "T6 18:00-20:00"]]
+
+for ten_cd, tien_to, tags in CHU_DE_100:
+    for i, hau_to in enumerate(HAU_TO):
+        ma = f"{tien_to}{101 + i}"
+        cap = CAP_THEO_MUC[i]
+        lo, hi = GIA_THEO_CAP[cap]
+        gia = round(random.randint(lo, hi), -4)
+        gv = GV_THEO_CHU_DE.get(tags[0], "GV12")
+        ten = f"{ten_cd} {hau_to}"
+
+        if i % 3 == 0:  # cu 3 khoa thi co 1 khoa offline
+            ncc = random.choice(NCC_OFFLINE)
+            si_so = random.randint(20, 40)
+            ma_out, kh = off(ma, ten, ncc, tags, cap, gia, f"{random.randint(16, 40)} buổi",
+                             random.choice(CA_HOC),
+                             f"2026-09-{random.randint(10, 28):02d}",
+                             f"2026-09-{random.randint(1, 9):02d}",
+                             PROVIDERS[ncc]["khu_vuc"],
+                             si_so, random.randint(0, si_so),
+                             round(random.uniform(3.9, 4.9), 1),
+                             random.random() < 0.75, gv)
+        else:
+            ncc = random.choice(NCC_ONLINE)
+            ma_out, kh = on(ma, ten, ncc, tags, cap, gia, f"{random.randint(10, 40)} giờ",
+                            random.randint(80, 3000),
+                            round(random.uniform(3.9, 4.9), 1),
+                            random.random() < 0.8, gv)
+        COURSES[ma_out] = kh
+
 FIXED = {
     "0912345203": {"ho_ten": "Nguyễn Chí Hướng", "muc_tieu": ["AI", "dữ liệu"], "trinh_do": "mới bắt đầu",
                    "ngan_sach": 2_000_000, "lich_ranh": ["T2 tối", "T4 tối"],

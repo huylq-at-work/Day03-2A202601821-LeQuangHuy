@@ -150,10 +150,16 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
     if max_price is None:
         return "LỖI: Giá tối đa phải là số không âm."
 
+    # Người dùng hỏi mơ hồ ("còn môn khác không?") thì duyệt toàn bộ danh mục
+    # thay vì đi tìm đúng chữ "khác" — vốn không phải chủ đề nào cả.
+    MO_HO = {"khác", "khac", "môn khác", "mon khac", "tất cả", "tat ca", "toàn bộ",
+             "bất kỳ", "gì cũng được", "all", "any", "*"}
     topic_key = topic.casefold()
+    tim_tat_ca = topic_key in MO_HO
+
     matches = []
     for code, course in COURSES.items():
-        has_topic = any(
+        has_topic = tim_tat_ca or any(
             topic_key == _clean(course_topic).casefold()
             for course_topic in course["chu_de"]
         )
@@ -167,11 +173,58 @@ def search_courses(chu_de: str, gia_toi_da: int) -> str:
         )
 
     matches.sort(key=lambda item: (item[0], item[1]))
+
+    # 128 khóa mà đổ hết ra thì Observation quá dài, cắt bớt nhưng nói rõ đã cắt
+    GIOI_HAN = 15
+    if len(matches) > GIOI_HAN:
+        con_lai = len(matches) - GIOI_HAN
+        matches = matches[:GIOI_HAN]
+        phan_du = (f"\n(Hiển thị {GIOI_HAN} khóa rẻ nhất, còn {con_lai} khóa khác. "
+                   f"Thu hẹp chủ đề hoặc hạ trần giá để xem chính xác hơn.)")
+    else:
+        phan_du = ""
     return "\n".join(
         f"{code} - {course['ten']} - {_money(course['gia'])} - "
         f"{course['hinh_thuc']} - {course['trinh_do_yeu_cau']}"
         for _, code, course in matches
-    )
+    ) + phan_du
+
+
+def list_topics(gia_toi_da: str = "") -> str:
+    """
+    Liệt kê tất cả chủ đề đang có trong danh mục kèm số khóa và giá rẻ nhất.
+
+    Dùng tool này khi người dùng hỏi mơ hồ và chưa nêu rõ chủ đề, ví dụ
+    "có những khóa gì?", "còn môn nào khác không?", "gợi ý cho tôi vài môn".
+    KHÔNG được truyền chữ "khác" hay "tất cả" vào search_courses — dùng tool này.
+
+    Args:
+        gia_toi_da (str): Trần giá lọc theo, để trống nghĩa là không lọc.
+
+    Returns:
+        str: Danh sách chủ đề, mỗi dòng gồm tên chủ đề, số khóa và giá thấp nhất.
+    """
+    tran = _parse_price(gia_toi_da) if _clean(gia_toi_da) else None
+
+    thong_ke = {}
+    for course in COURSES.values():
+        if tran is not None and course["gia"] > tran:
+            continue
+        for cd in course["chu_de"]:
+            cd = _clean(cd)
+            if cd not in thong_ke:
+                thong_ke[cd] = [0, course["gia"]]
+            thong_ke[cd][0] += 1
+            thong_ke[cd][1] = min(thong_ke[cd][1], course["gia"])
+
+    if not thong_ke:
+        return f"Không có chủ đề nào có khóa dưới {_money(tran)}."
+
+    dong = [f"{cd}: {so} khóa, từ {_money(gia)}"
+            for cd, (so, gia) in sorted(thong_ke.items(), key=lambda x: -x[1][0])]
+    dau = f"Có {len(thong_ke)} chủ đề"
+    dau += f" với khóa dưới {_money(tran)}" if tran is not None else f" trong {len(COURSES)} khóa"
+    return dau + ":\n" + "\n".join(dong)
 
 
 def get_course_detail(ma_khoa: str) -> str:
@@ -466,4 +519,5 @@ AVAILABLE_TOOLS = {
     "get_provider": get_provider,
     "compare_courses": compare_courses,
     "dang_ky_hoc_vien": dang_ky_hoc_vien,
+    "list_topics": list_topics,
 }
