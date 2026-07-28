@@ -186,9 +186,16 @@ md.append("| Giới hạn phạm vi (mục 1C) | `src/prompts.py` | Câu lạc �
 md.append("| Chống rò rỉ (mục 1D) | `src/prompts.py` | Injection, đòi system prompt, đòi dump dữ liệu |")
 md.append("| Guardrail vòng lặp | `src/app.py` + `MAX_ITERATIONS` | Câu cố tình gây lặp vô tận |")
 md.append("| Tool trả `LỖI:` thay vì crash | `src/tools.py` | Dữ liệu không tồn tại, ép Agent bịa |\n")
-md.append("## 5. Phần điền tay sau buổi thuyết trình\n")
-md.append("_Ghi lại nhóm nào hỏi câu gì trên lớp, Agent phản ứng ra sao, "
-          "và nhóm mình đã phản biện thế nào._\n")
+md.append("## 5. [[CAN-DIEN]] Biên bản buổi thuyết trình trên lớp\n")
+md.append("> Phần trên là kết quả tự chạy. Phần này phải điền tay sau buổi cross-audit thật.\n"
+          "> Tìm nhanh mọi chỗ cần điền: `python scripts/viec_con_lai.py`\n")
+md.append("| Nhóm tấn công | Câu hỏi họ ném vào | Agent phản ứng thế nào | Nhóm mình phản biện |")
+md.append("| :-- | :-- | :-- | :-- |")
+md.append("| | | | |")
+md.append("| | | | |")
+md.append("| | | | |\n")
+md.append("**Tổng kết**: _(số đòn bị hỏi, số đòn Agent đỡ được, có câu nào làm lộ điểm yếu không)_\n")
+md.append("**Nhóm mình đi tấn công nhóm khác**: _(dùng câu nào, nhóm bạn dính lỗi gì)_\n")
 
 with open(OUT, "w", encoding="utf-8") as f:
     f.write("\n".join(md))

@@ -1,5 +1,7 @@
 # 🏫 BÀI LAB 3: CHATBOT VS REACT AGENT - TỪ Ý TƯỞNG ĐẾN THỰC THI
 
+> **Cách cài đặt và chạy dự án**: xem [HUONG_DAN_CHAY.md](HUONG_DAN_CHAY.md)
+
 ---
 
 ### 💡 1. LỜI NÓI ĐẦU & NỀN TẢNG LÝ THUYẾT (4 CẤP ĐỘ AI HỘI THOẠI)
