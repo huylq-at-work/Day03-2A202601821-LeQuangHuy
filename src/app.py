@@ -102,16 +102,22 @@ LOI_XIN_LOI_GUARDRAIL = ("Xin lỗi, mình chưa tra được thông tin bạn c
                          "bộ phận hỗ trợ giúp mình nhé.")
 
 
-def react_steps(user_query: str, provider):
+def react_steps(user_query: str, provider, lich_su=None):
     """
     Chạy vòng lặp ReAct và trả về danh sách bước dạng dict.
 
     Đây là phần lõi dùng chung: run_react_agent() in ra terminal,
     còn web_ui.py dựng giao diện — cả hai đều gọi hàm này nên không
     bao giờ lệch logic.
+
+    lich_su: danh sách [(câu hỏi, câu trả lời)] của các lượt trước,
+             để hội thoại nhiều lượt vẫn nhớ ngữ cảnh.
     """
     buoc = []
-    history = f"Câu hỏi: {user_query}\n"
+    history = ""
+    for q, a in (lich_su or []):
+        history += f"Câu hỏi: {q}\nFinal Answer: {a}\n"
+    history += f"Câu hỏi: {user_query}\n"
 
     for vong in range(1, MAX_ITERATIONS + 1):
         # 1. Hỏi LLM xem bước tiếp theo làm gì
